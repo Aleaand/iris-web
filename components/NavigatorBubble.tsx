@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { irisApi } from "@/lib/api";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 
 export default function NavigatorBubble() {
   const { data: session } = useSession();
@@ -21,8 +22,13 @@ export default function NavigatorBubble() {
         try {
           const data = await irisApi.getManagerProfile(token);
           setManager(data);
-        } catch (error) {
-          console.error("Error trayendo al gestor asignado:", error);
+        } catch (error: any) {
+          if (error.message?.includes("Token inválido") || error.message?.includes("expirado")) {
+            console.warn("Sesión expirada en NavigatorBubble, cerrando sesión...");
+            signOut({ callbackUrl: "/auth/login?error=SessionExpired" });
+          } else {
+            console.error("Error trayendo al gestor asignado:", error);
+          }
         } finally {
           setLoading(false);
         }

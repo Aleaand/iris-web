@@ -1,14 +1,16 @@
 "use client";
 import { useState, useEffect, Suspense, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import Starfield from "@/components/Starfield";
+import Link from "next/link";
 import {
   Search, Rocket, Calendar, Users, ChevronRight, Loader2, Sparkles, Shield, Crown,
   Zap, Globe, MessageCircle, ArrowLeft, ArrowRight, CheckCircle2,
   Plane, Hotel, Briefcase, Plus, Minus, Info, ShieldCheck, CreditCard, AlertTriangle, X, Activity, Clock, MapPin, UserPlus, User, Heart, ShieldAlert, FileText, Timer, Edit3, Check, Image as ImageIcon,
-  Car
+  Car, Lock
 } from "lucide-react";
 import { irisApi } from "@/lib/api";
 import { Destination, Flight, Hotel as HotelType, Passenger } from "@/types";
@@ -46,6 +48,7 @@ function BookingContent() {
   const [savingPassenger, setSavingPassenger] = useState<number | null>(null);
   const [showAntaresModal, setShowAntaresModal] = useState(false);
   const [showAntaresSuccess, setShowAntaresSuccess] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [antaresData, setAntaresData] = useState({ phone: "", email: "", method: "chat" as "chat" | "video" });
   const [hotels, setHotels] = useState<any[]>([]);
   const [transfers, setTransfers] = useState<any[]>([]);
@@ -121,6 +124,15 @@ function BookingContent() {
       return { ...prev, passengerData: data };
     });
   }, [form.passengers_count]);
+
+  useEffect(() => {
+    if (showAuthModal || showAntaresModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [showAuthModal, showAntaresModal]);
 
   useEffect(() => {
     async function load() {
@@ -321,9 +333,23 @@ function BookingContent() {
   };
 
   const nextStep = () => {
+    if (bookingMode === 'services' && step === 1) {
+      if (status !== "authenticated") {
+        setShowAuthModal(true);
+        return;
+      }
+      setStep(3);
+      window.scrollTo(0, 0);
+      return;
+    }
+
     if (bookingMode === 'mission' && step === 1 && !selection.outboundFlight) { setErrorPrompt("Selecciona un vuelo."); return; }
 
     if (step === 2) {
+      if (status !== "authenticated") {
+        setShowAuthModal(true);
+        return;
+      }
       if (selection.package === 'antares') {
         handleAntaresContact();
         return;
@@ -550,6 +576,62 @@ function BookingContent() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showAuthModal && (
+            <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowAuthModal(false)}
+                className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+              />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                className="relative bg-[#0d0a1a] border border-white/10 p-10 rounded-[3.5rem] max-w-md w-full shadow-[0_0_100px_rgba(147,51,234,0.2)] text-center space-y-8 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-linear-to-br from-purple-600/5 to-transparent pointer-events-none" />
+
+                <div className="w-20 h-20 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto text-purple-400 mb-6">
+                  <Lock size={40} />
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-3xl font-bold text-white tracking-tight">A un solo paso de la Aventura...</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">Inicia Sesión para continuar con la reserva.</p>
+                </div>
+
+                <div className="flex flex-col gap-4 pt-4">
+                  <Link
+                    href="/auth/login?callbackUrl=/booking"
+                    className="w-full py-5 bg-white text-black rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-purple-600 hover:text-white transition-all shadow-2xl text-center"
+                  >
+                    Iniciar Sesión
+                  </Link>
+                  <Link
+                    href="/auth/register?callbackUrl=/booking"
+                    className="w-full py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-white transition-colors text-center"
+                  >
+                    Registrate ahora
+                  </Link>
+                  <button
+                    onClick={() => setShowAuthModal(false)}
+                    className="text-[8px] font-bold uppercase tracking-widest text-slate-700 hover:text-slate-500 transition-colors"
+                  >
+                    Volver
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
       <AnimatePresence>
         {errorPrompt && (
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="fixed top-24 left-1/2 -translate-x-1/2 z-[150] w-full max-w-lg px-6">
@@ -566,7 +648,7 @@ function BookingContent() {
 
       <div className={`max-w-[1400px] mx-auto px-6 grid grid-cols-1 ${bookingMode === 'mission' && selection.outboundFlight && step < 6 ? 'lg:grid-cols-4' : 'max-w-4xl'} gap-12 transition-all duration-700 relative z-10`}>
         <AnimatePresence>
-          {((bookingMode === 'mission' && selection.outboundFlight) || bookingMode === 'services') && step < 6 && (
+          {bookingMode === 'mission' && selection.outboundFlight && step < 6 && (
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="hidden lg:block sticky top-32 h-fit space-y-6">
               <div className="card-purple p-8 rounded-[3rem] border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl relative overflow-hidden group">
                 <div className="absolute inset-0 bg-linear-to-br from-purple-600/5 to-transparent pointer-events-none" />
@@ -617,16 +699,6 @@ function BookingContent() {
                         </div>
                       )}
                     </>
-                  )}
-
-                  {bookingMode === 'services' && (
-                    <div className="p-5 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 space-y-2">
-                      <div className="flex items-center gap-2 text-indigo-400 mb-2">
-                        <Zap size={14} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Servicios Extras</span>
-                      </div>
-                      <p className="text-[9px] text-slate-400 leading-relaxed">Configurando servicios personalizados para {form.passengers_count} Pasajero(s) sin reserva de vuelo activa.</p>
-                    </div>
                   )}
 
                   {/* Passengers */}
@@ -797,11 +869,30 @@ function BookingContent() {
                         ))}
                       </div>
 
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5">
+                          <div className="flex items-center gap-2 mb-2">
+                            <ShieldCheck size={14} className="text-indigo-400" />
+                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Pasaporte Iris</span>
+                          </div>
+                          <p className="text-2xl font-bold text-white">{(tariffs.passport_management || 2500).toLocaleString()}€</p>
+                          <p className="text-[8px] text-slate-500 uppercase font-bold mt-1">Por explorador</p>
+                        </div>
+                        <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Zap size={14} className="text-purple-400" />
+                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Iris Training</span>
+                          </div>
+                          <p className="text-2xl font-bold text-white">{(tariffs.training || 50000).toLocaleString()}€</p>
+                          <p className="text-[8px] text-slate-500 uppercase font-bold mt-1">Protocolo Completo</p>
+                        </div>
+                      </div>
+
                       <button
-                        onClick={() => setStep(3)}
-                        className="w-full py-6 bg-white text-black rounded-3xl font-black text-xs uppercase tracking-[0.2em] hover:bg-indigo-600 hover:text-white transition-all shadow-2xl"
+                        onClick={nextStep}
+                        className="w-full py-6 bg-white text-black rounded-full font-black text-xs uppercase tracking-[0.2em] hover:bg-indigo-600 hover:text-white transition-all shadow-2xl flex items-center justify-center gap-3"
                       >
-                        Continuar a Detalles de Pasajeros
+                        Continuar con la Solicitud <ArrowRight size={18} />
                       </button>
                     </motion.div>
                   )}

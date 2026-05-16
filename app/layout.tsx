@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   },
   description:
     "La primera agencia de viajes espaciales privada.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"),
   openGraph: {
     siteName: "Iris Aerospace",
     locale: "es_ES",

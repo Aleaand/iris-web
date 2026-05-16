@@ -1,14 +1,14 @@
 "use client";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, Suspense } from "react";
 import { createPortal } from "react-dom";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { MessageCircle, Calendar, Video, Phone, Send, Loader2, User, Check, Clock, Globe, ShieldCheck, MessageSquare } from "lucide-react";
 import { irisApi } from "@/lib/api";
 import { Message, ManagerProfile } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function MiGestorPage() {
+function GestorContent() {
   const { data: session } = useSession();
   const [messages, setMessages] = useState<Message[]>([]);
   const [manager, setManager] = useState<ManagerProfile | null>(null);
@@ -80,8 +80,12 @@ export default function MiGestorPage() {
         ]);
         setMessages(msgData.datos || []);
         setManager(managerData);
-      } catch (error) {
-        console.error("Error cargando datos del gestor:", error);
+      } catch (error: any) {
+        if (error.message?.includes("Token inválido") || error.message?.includes("expirado")) {
+          signOut({ callbackUrl: "/auth/login?error=SessionExpired" });
+        } else {
+          console.error("Error cargando datos del gestor:", error);
+        }
       } finally {
         setLoading(false);
       }
@@ -570,5 +574,18 @@ export default function MiGestorPage() {
         document.body
       )}
     </div>
+  );
+}
+
+export default function MiGestorPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <Loader2 size={48} className="text-purple-500 animate-spin mb-4" />
+        <p className="mono-text text-[10px] uppercase tracking-[0.3em] text-slate-500">Cargando interfaz de gestión...</p>
+      </div>
+    }>
+      <GestorContent />
+    </Suspense>
   );
 }
