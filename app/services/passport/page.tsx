@@ -3,6 +3,12 @@ import Navbar from "@/components/Navbar";
 import Starfield from "@/components/Starfield";
 import { ShieldCheck, FileText, Globe, CheckCircle2, ChevronRight, Rocket, Users } from "lucide-react";
 import Link from "next/link";
+import dynamic from 'next/dynamic';
+
+const Spline = dynamic(() => import('@splinetool/react-spline'), {
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-[#06040d] animate-pulse" />
+});
 
 export default function PassportServicePage() {
   return (
@@ -10,7 +16,14 @@ export default function PassportServicePage() {
       <Starfield />
       <Navbar />
 
-      <section className="relative z-10 pt-48 pb-32 px-6 max-w-6xl mx-auto">
+      <header className="relative w-full h-[60vh] md:h-[80vh] overflow-hidden">
+         <Spline
+          scene="https://prod.spline.design/IFnz3XlG8CH9Wx4k/scene.splinecode" 
+        />
+        <div className="absolute inset-0 bg-linear-to-t from-[#06040d] via-transparent to-transparent pointer-events-none" />
+      </header>
+
+      <section className="relative z-10 pt-12 pb-32 px-6 max-w-6xl mx-auto">
         <div className="grid md:grid-cols-2 gap-20 items-center">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 mb-8">

@@ -24,12 +24,24 @@ export default function Navbar() {
     setMenuMode(pathname.startsWith("/portal") ? 'private' : 'public');
   }, [pathname]);
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({
+        top: window.innerHeight * 1.2,
+        behavior: "smooth",
+      });
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
       if (window.innerWidth >= 1024) {
-        if (currentScrollY > 50) {
+        if (pathname === "/") {
+          setIsVisible(true);
+        } else if (currentScrollY > 50) {
           setIsVisible(false);
         } else {
           setIsVisible(true);
@@ -84,7 +96,7 @@ export default function Navbar() {
         <nav className="w-full max-w-6xl apple-glass rounded-full px-6 py-3 flex items-center justify-between border border-white/10 shadow-2xl shadow-black/40">
 
           <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-3">
+            <Link href="/#aerospace" onClick={handleLogoClick} className="flex items-center gap-3">
               <Image
                 src="/img/logo_iris.png"
                 alt="Iris Logo"

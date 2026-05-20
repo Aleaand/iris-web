@@ -3,6 +3,8 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import TransicionPagina from "@/components/TransicionPagina";
 import NavigatorBubble from "@/components/NavigatorBubble";
+import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 
 export const metadata: Metadata = {
   title: {
@@ -27,10 +29,16 @@ export default function LayoutRaiz({ children }: { children: React.ReactNode }) 
     <html lang="es">
       <body>
         <Providers>
-          <TransicionPagina>
-            {children}
-          </TransicionPagina>
+          <div className="flex flex-col min-h-screen">
+            <TransicionPagina>
+              <main className="flex-grow">
+                {children}
+              </main>
+            </TransicionPagina>
+            <Footer />
+          </div>
           <NavigatorBubble />
+          <ScrollToTop />
         </Providers>
       </body>
     </html>

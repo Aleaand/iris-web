@@ -4,6 +4,7 @@ export interface Destination {
   slug: string;
   description: string;
   distance_au: string;
+  max_distance_au?: string;
   temperature: string;
   gravity: string;
   image_query: string;

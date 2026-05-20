@@ -10,7 +10,7 @@ import {
   Search, Rocket, Calendar, Users, ChevronRight, Loader2, Sparkles, Shield, Crown,
   Zap, Globe, MessageCircle, ArrowLeft, ArrowRight, CheckCircle2,
   Plane, Hotel, Briefcase, Plus, Minus, Info, ShieldCheck, CreditCard, AlertTriangle, X, Activity, Clock, MapPin, UserPlus, User, Heart, ShieldAlert, FileText, Timer, Edit3, Check, Image as ImageIcon,
-  Car, Lock
+  Car, Lock, Bed, Droplets, Archive, Tv, Wind, Orbit, Moon, Bot, Wine, Compass
 } from "lucide-react";
 import { irisApi } from "@/lib/api";
 import { Destination, Flight, Hotel as HotelType, Passenger } from "@/types";
@@ -1556,44 +1556,87 @@ function BookingContent() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <button
                           onClick={() => { const d = [...selection.passengerData]; d[i].seat_type = 'Nova'; setSelection({ ...selection, passengerData: d }); }}
-                          className={`relative p-8 rounded-[2.5rem] border-2 text-left transition-all duration-500 overflow-hidden group ${p.seat_type === 'Nova' ? 'border-blue-500 bg-blue-600/10' : 'border-white/5 bg-white/5 hover:border-white/10'}`}
+                          className={`group relative rounded-[3rem] border-2 overflow-hidden transition-all duration-500 flex flex-col justify-between text-left ${p.seat_type === 'Nova' ? 'border-purple-500 bg-purple-600/10' : 'border-white/5 bg-white/[0.01] hover:border-purple-500/20 hover:scale-[1.01]'}`}
                         >
-                          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 blur-3xl -z-10" />
-                          <div className="flex justify-between items-start mb-6">
-                            <div className={`px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${p.seat_type === 'Nova' ? 'bg-blue-500 text-white' : 'bg-white/10 text-slate-500'}`}>Clase Estándar</div>
-                            <div className="text-right">
-                              <p className="text-2xl font-black text-white">Nova</p>
+                          <div>
+                            <div className="relative aspect-[16/9] overflow-hidden">
+                              <img
+                                src="/img/naves/cabinanova.png"
+                                alt="Cabina Nova"
+                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-[#06040d] via-transparent to-transparent" />
+                              <div className="absolute top-6 left-6 px-4 py-1.5 bg-purple-500/20 backdrop-blur-md rounded-full border border-purple-500/30 text-[9px] font-mono tracking-widest text-purple-300 uppercase">
+                                La más solicitada por nuestros pasajeros
+                              </div>
+                            </div>
+                            <div className="p-10 space-y-6">
+                              <h3 className="text-3xl font-bold tracking-tight text-white group-hover:text-purple-400 transition-colors">
+                                Cabina Nova
+                              </h3>
+                              <p className="text-slate-400 text-sm font-light leading-relaxed">
+                                Tu propio refugio perfecto y tecnológico para el viajero interplanetario. Un espacio sumamente inteligente donde la ergonomía y la biometría se unen para proporcionarte un descanso placentero durante todo el viaje.
+                              </p>
+                              <ul className="space-y-3 pt-4 border-t border-white/5 text-xs text-slate-300 font-light">
+                                <li className="flex items-center gap-2"><Bed size={14} className="text-purple-400 shrink-0" />Cama Ergonómica de Máximo Confort (con anclajes de seguridad)</li>
+                                <li className="flex items-center gap-2"><Droplets size={14} className="text-purple-400 shrink-0" />Baño Privado con Ducha de Microbruma Sónica</li>
+                                <li className="flex items-center gap-2"><Archive size={14} className="text-purple-400 shrink-0" />Módulo de Armario Inteligente</li>
+                                <li className="flex items-center gap-2"><Tv size={14} className="text-purple-400 shrink-0" />Consola de Entretenimiento y TV</li>
+                                <li className="flex items-center gap-2"><Wind size={14} className="text-purple-400 shrink-0" />Climatización y Optimización de Oxígeno Automática</li>
+                                <li className="flex items-center gap-2"><Orbit size={14} className="text-purple-400 shrink-0" />Sistemas de Gravedad Adaptativa Local</li>
+                                <li className="flex items-center gap-2"><Moon size={14} className="text-purple-400 shrink-0" />Regulación del Ciclo del Sueño Lumínica</li>
+                                <li className="flex items-center gap-2"><Bot size={14} className="text-purple-400 shrink-0" />Habitación inteligente con IA personal integrada</li>
+                              </ul>
                             </div>
                           </div>
-                          <ul className="space-y-3 mb-8">
-                            {['Asiento Ergonómico Orbital', 'Ventana de Observación Compartida', 'Menú Estándar Iris', '10kg de Equipaje Personal'].map(f => (
-                              <li key={f} className="flex items-center gap-2 text-[10px] text-slate-400"><CheckCircle2 size={12} className="text-blue-500" /> {f}</li>
-                            ))}
-                          </ul>
-                          <div className="h-40 rounded-3xl bg-black/40 overflow-hidden mb-6">
-                            <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=800" className="w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700" alt="Nova Class" />
-                          </div>
+                          {p.seat_type === 'Nova' && (
+                            <div className="absolute top-6 right-6 z-20">
+                              <CheckCircle2 size={24} className="text-purple-500" />
+                            </div>
+                          )}
                         </button>
 
                         <button
                           onClick={() => { const d = [...selection.passengerData]; d[i].seat_type = 'Supernova'; setSelection({ ...selection, passengerData: d }); }}
-                          className={`relative p-8 rounded-[2.5rem] border-2 text-left transition-all duration-500 overflow-hidden group ${p.seat_type === 'Supernova' ? 'border-purple-500 bg-purple-600/10' : 'border-white/5 bg-white/5 hover:border-white/10'}`}
+                          className={`group relative rounded-[3rem] border-2 overflow-hidden transition-all duration-500 flex flex-col justify-between text-left ${p.seat_type === 'Supernova' ? 'border-indigo-500 bg-indigo-600/10' : 'border-white/5 bg-white/[0.01] hover:border-indigo-500/20 hover:scale-[1.01]'}`}
                         >
-                          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/5 blur-3xl -z-10" />
-                          <div className="flex justify-between items-start mb-6">
-                            <div className={`px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${p.seat_type === 'Supernova' ? 'bg-purple-600 text-white' : 'bg-white/10 text-slate-500'}`}>Clase Premium</div>
-                            <div className="text-right">
-                              <p className="text-2xl font-black text-white">Supernova</p>
+                          <div>
+                            <div className="relative aspect-[16/9] overflow-hidden">
+                              <img
+                                src="/img/naves/cabinasupernova.png"
+                                alt="Cabina Supernova Suite"
+                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-[#06040d] via-transparent to-transparent" />
+                              <div className="absolute top-6 left-6 px-4 py-1.5 bg-indigo-500/20 backdrop-blur-md rounded-full border border-indigo-500/30 text-[9px] font-mono tracking-widest text-indigo-300 uppercase">
+                                La más alagada por nuestros pasajeros
+                              </div>
+                            </div>
+                            <div className="p-10 space-y-6">
+                              <h3 className="text-3xl font-bold tracking-tight text-white group-hover:text-indigo-400 transition-colors">
+                                Cabina Supernova
+                              </h3>
+                              <p className="text-slate-400 text-sm font-light leading-relaxed">
+                                La máxima exclusividad. Una suntuosa suite privada sobre el vacío espacial, dotada de amplios ventanales panorámicos y servicios dedicados para disfrutar del viaje.
+                              </p>
+                              <ul className="space-y-3 pt-4 border-t border-white/5 text-xs text-slate-300 font-light">
+                                <li className="flex items-center gap-2"><Bed size={14} className="text-indigo-400 shrink-0" />Cama King-Size de Confort Adaptativo</li>
+                                <li className="flex items-center gap-2"><Droplets size={14} className="text-indigo-400 shrink-0" />Spa Suite con Bañera de Hidromasaje Hidrodinámica</li>
+                                <li className="flex items-center gap-2"><Tv size={14} className="text-indigo-400 shrink-0" />Consola de Entretenimiento y zonas de recreación(TV, escritorio)</li>
+                                <li className="flex items-center gap-2"><Bot size={14} className="text-indigo-400 shrink-0" />Asistente de IA con opción holográfica</li>
+                                <li className="flex items-center gap-2"><Wine size={14} className="text-indigo-400 shrink-0" />Bar de Nutrición y Coctelería</li>
+                                <li className="flex items-center gap-2"><Crown size={14} className="text-indigo-400 shrink-0" />Acceso Exclusivo y Beneficios VIP</li>
+                                <li className="flex items-center gap-2"><Compass size={14} className="text-indigo-400 shrink-0" />Pase de Acceso Total a la Cubierta VIP "Astro-Lounge"</li>
+                                <li className="flex items-center gap-2"><Rocket size={14} className="text-indigo-400 shrink-0" />Embarque y Lanzamiento Prioritario (Fast-Track)</li>
+                                <li className="flex items-center gap-2"><Sparkles size={14} className="text-indigo-400 shrink-0" />Prioridad en Experiencias (EVA)</li>
+                              </ul>
                             </div>
                           </div>
-                          <ul className="space-y-3 mb-8">
-                            {['Suite Privada Zero-G', 'Ventana Panorámica 360º', 'Catering Gourmet Interplanetario', 'Acceso a Sala VIP en Puerto', '30kg de Equipaje Personal'].map(f => (
-                              <li key={f} className="flex items-center gap-2 text-[10px] text-slate-400"><Sparkles size={12} className="text-purple-400" /> {f}</li>
-                            ))}
-                          </ul>
-                          <div className="h-40 rounded-3xl bg-black/40 overflow-hidden mb-6">
-                            <img src="https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?q=80&w=800" className="w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700" alt="Supernova Class" />
-                          </div>
+                          {p.seat_type === 'Supernova' && (
+                            <div className="absolute top-6 right-6 z-20">
+                              <CheckCircle2 size={24} className="text-indigo-500" />
+                            </div>
+                          )}
                         </button>
                       </div>
                     </div>

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { irisApi } from "@/lib/api";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 export default function NavigatorBubble() {
   const { data: session } = useSession();
@@ -13,6 +14,31 @@ export default function NavigatorBubble() {
   const [manager, setManager] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(1);
+
+  const pathname = usePathname();
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    if (pathname !== "/") {
+      setIsVisible(true);
+      return;
+    }
+
+    setIsVisible(false);
+
+    const handleScroll = () => {
+      if (window.scrollY > window.innerHeight * 0.8) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [pathname]);
 
   useEffect(() => {
     async function fetchManager() {
@@ -38,7 +64,12 @@ export default function NavigatorBubble() {
   }, [session]);
 
   return (
-    <div className="fixed bottom-10 right-10 z-[100]">
+    <div
+      className={`fixed bottom-10 right-10 z-[100] transition-all duration-700 transform ${isVisible
+          ? "opacity-100 translate-y-0 pointer-events-auto"
+          : "opacity-0 translate-y-8 pointer-events-none"
+        }`}
+    >
       <AnimatePresence>
         {isOpen && (
           <motion.div

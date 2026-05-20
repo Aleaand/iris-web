@@ -43,6 +43,7 @@ export default function TransicionPagina({ children }: PropsTransicionPagina) {
         initial="oculto"
         animate="visible"
         exit="saliendo"
+        className="flex-grow flex flex-col"
         style={{ isolation: "isolate" }}
       >
         {children}
