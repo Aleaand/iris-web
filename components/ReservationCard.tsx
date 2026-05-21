@@ -22,7 +22,18 @@ export default function ReservationCard({ reservation }: { reservation: any }) {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionSuccess, setActionSuccess] = useState(false);
 
-  const activeFlight = details?.space_flight || details || reservation.space_flight || reservation || null;
+  const [localStatus, setLocalStatus] = useState<string>(reservation.status);
+
+  const activeFlight =
+    details?.space_flight ||
+    details?.outbound_flight ||
+    details?.flight ||
+    details ||
+    reservation.space_flight ||
+    reservation.outbound_flight ||
+    reservation.flight ||
+    reservation ||
+    null;
   const activeSeatType = details?.seat_type || details?.clase_asiento || reservation.seat_type || reservation.clase_asiento || "Desconocido";
   const rawPrice = details?.total_group_price || reservation.total_group_price || reservation.total_price || details?.total_price || 0;
   const activePrice = Number(rawPrice) || 0;
@@ -122,6 +133,29 @@ export default function ReservationCard({ reservation }: { reservation: any }) {
         reservation_id: reservation.id
       }, token);
 
+      let chatMessage = '';
+      let newStatus = '';
+      if (actionModal === 'cancel') {
+        chatMessage = `He solicitado la cancelación de la reserva #${reservation.id}.`;
+        newStatus = 'Solicitando Cancelación...';
+      } else if (actionModal === 'upgrade') {
+        chatMessage = `He solicitado un upgrade para la reserva #${reservation.id}.`;
+        newStatus = 'Solicitando Upgrade...';
+      } else {
+        chatMessage = `He solicitado modificar la reserva #${reservation.id}.`;
+        newStatus = 'Solicitando Modificación...';
+      }
+
+      try {
+        await irisApi.sendMessage(token, chatMessage);
+      } catch (chatErr) {
+        console.error("Error al enviar el mensaje de chat de aviso:", chatErr);
+      }
+
+      if (newStatus) {
+        setLocalStatus(newStatus);
+      }
+
       setActionSuccess(true);
       setTimeout(() => {
         setActionModal(null);
@@ -168,7 +202,7 @@ export default function ReservationCard({ reservation }: { reservation: any }) {
       <div className="relative z-10 flex flex-col md:flex-row items-stretch gap-0">
         <div className="flex-1 p-8 md:p-10">
           <div className="flex items-center gap-3 mb-6">
-            <StatusBadge status={reservation.status} />
+            <StatusBadge status={localStatus} />
             <div className="h-1 w-1 rounded-full bg-slate-700" />
             <span className="mono-text text-[10px] text-slate-500 uppercase tracking-[0.2em]">{reservation.locator}</span>
           </div>
@@ -346,7 +380,7 @@ export default function ReservationCard({ reservation }: { reservation: any }) {
                   ) : details ? (
                     <div className="w-full max-w-5xl">
                       <ReservationTicketTemplate
-                        reservation={details}
+                        reservation={{ ...details, status: localStatus }}
                         activeFlight={activeFlight}
                         departureDate={departureDate}
                         arrivalDate={arrivalDate}

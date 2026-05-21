@@ -29,6 +29,49 @@ export default function ReservationTicketTemplate({
   const mainPassenger = passengers?.[0] || reservation.passenger || reservation.pasajero || {};
   const user = reservation.user || {};
 
+  const resolvedDepartureDate = 
+    departureDate || 
+    activeFlight?.departure_date || 
+    activeFlight?.departureDate ||
+    reservation.outbound_flight?.departure_date ||
+    reservation.departure_date ||
+    null;
+
+  const resolvedArrivalDate = 
+    arrivalDate || 
+    activeFlight?.arrival_date || 
+    activeFlight?.landing_date ||
+    activeFlight?.arrivalDate ||
+    reservation.outbound_flight?.arrival_date ||
+    reservation.outbound_flight?.landing_date ||
+    reservation.arrival_date ||
+    reservation.landing_date ||
+    null;
+
+  const resolvedStarshipName = 
+    starshipName && starshipName !== 'Desconocida' && starshipName !== 'TBD' ? starshipName : (
+      reservation.outbound_flight?.starship?.name ||
+      reservation.outbound_flight?.starship_name ||
+      reservation.outbound_flight?.ship_name ||
+      reservation.flight?.starship?.name ||
+      reservation.flight?.starship_name ||
+      reservation.flight?.ship_name ||
+      activeFlight?.starship?.name ||
+      activeFlight?.starship_name ||
+      activeFlight?.ship_name ||
+      reservation.starship_name ||
+      reservation.ship_name ||
+      'Iris Vanguard'
+    );
+
+  const originPlanet = 
+    reservation.outbound_flight?.origin_name || 
+    reservation.origin_name || 
+    activeFlight?.origin?.name || 
+    activeFlight?.origin_name ||
+    activeFlight?.origin ||
+    'Tierra';
+
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'Pendiente';
     try {
@@ -51,9 +94,13 @@ export default function ReservationTicketTemplate({
 
   const getBoardingTime = (dateStr: string | null) => {
     if (!dateStr) return 'TBD';
-    const d = new Date(dateStr);
-    d.setMinutes(d.getMinutes() - 45);
-    return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+    try {
+      const d = new Date(dateStr);
+      d.setHours(d.getHours() - 2);
+      return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+    } catch {
+      return 'TBD';
+    }
   };
 
   return (
@@ -105,18 +152,26 @@ export default function ReservationTicketTemplate({
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-8 mb-12">
               <div className="item">
-                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Salida (Fecha y Hora)</label>
-                <div className="text-lg font-bold text-slate-800">{formatDateTime(departureDate)}</div>
-                <div className="text-[10px] font-bold text-purple-600 uppercase">{formatDateTime(departureDate, 'time')}</div>
+                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Salida</label>
+                <div className="text-lg font-bold text-slate-800 uppercase tracking-tight">{originPlanet}</div>
+                <div className="text-[10px] font-bold text-purple-600 uppercase">
+                  {resolvedDepartureDate ? `${formatDateTime(resolvedDepartureDate)} • ${formatDateTime(resolvedDepartureDate, 'time')}` : 'TBD'}
+                </div>
               </div>
               <div className="item">
                 <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Aterrizaje (Fecha y Hora)</label>
-                <div className="text-lg font-bold text-slate-800">{formatDateTime(arrivalDate)}</div>
-                <div className="text-[10px] font-bold text-purple-600 uppercase">{formatDateTime(arrivalDate, 'time')}</div>
+                <div className="text-lg font-bold text-slate-800">
+                  {resolvedArrivalDate ? formatDateTime(resolvedArrivalDate) : 'TBD'}
+                </div>
+                <div className="text-[10px] font-bold text-purple-600 uppercase">
+                  {resolvedArrivalDate ? formatDateTime(resolvedArrivalDate, 'time') : 'TBD'}
+                </div>
               </div>
               <div className="item">
                 <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Hora de Embarque</label>
-                <span className="text-lg font-bold text-slate-800">{getBoardingTime(departureDate)}</span>
+                <span className="text-lg font-bold text-slate-800">
+                  {resolvedDepartureDate ? getBoardingTime(resolvedDepartureDate) : 'TBD'}
+                </span>
               </div>
               <div className="item">
                 <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Clase de Vuelo</label>
@@ -124,7 +179,7 @@ export default function ReservationTicketTemplate({
               </div>
               <div className="item">
                 <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Nave Asignada</label>
-                <span className="text-lg font-bold text-slate-800">{starshipName || 'TBD'}</span>
+                <span className="text-lg font-bold text-slate-800">{resolvedStarshipName}</span>
               </div>
               <div className="item">
                 <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Estado de Reserva</label>

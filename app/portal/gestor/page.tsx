@@ -23,6 +23,7 @@ function GestorContent() {
   const [meetingType, setMeetingType] = useState<'videollamada' | 'llamada'>('videollamada');
   const [loadingSlots, setLoadingSlots] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const taskProcessed = useRef(false);
@@ -66,8 +67,13 @@ function GestorContent() {
     return { ...msg, fecha, hora, isPast };
   }).sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
 
-  const scrollToBottom = () => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (behavior: "auto" | "smooth" = "smooth") => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior,
+      });
+    }
   };
   useEffect(() => {
     async function loadData() {
@@ -247,7 +253,7 @@ function GestorContent() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-8 space-y-6 no-scrollbar bg-[url('/img/stars_bg.png')] bg-fixed">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-8 space-y-6 no-scrollbar bg-[url('/img/stars_bg.png')] bg-fixed">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-10">
                 <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-slate-700 mb-6">

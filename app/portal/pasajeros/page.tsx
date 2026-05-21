@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Users, Plus, Loader2, User, CreditCard, Trash2, ShieldCheck, AlertCircle, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { Users, Plus, Loader2, User, CreditCard, Trash2, ShieldCheck, AlertCircle, ShieldAlert, CheckCircle2, Pencil } from "lucide-react";
 import { irisApi } from "@/lib/api";
 import { Passenger } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
@@ -268,7 +268,7 @@ export default function PasajerosPage() {
             </div>
 
             <h2 className="text-2xl font-bold text-white mb-8">
-              {editingId ? `Editando a ${formData.name}` : "Registro de Nuevo Explorador"}
+              {editingId ? `Editando a ${formData.name}` : "Registro de Nuevo Pasajero"}
             </h2>
 
             <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
@@ -496,7 +496,7 @@ export default function PasajerosPage() {
                   className="w-8 h-8 rounded-full flex items-center justify-center text-slate-700 hover:text-purple-400 hover:bg-purple-500/10 transition-all"
                   title="Editar datos y documentación"
                 >
-                  <AlertCircle size={16} />
+                  <Pencil size={16} />
                 </button>
                 <button
                   onClick={(e) => {
@@ -519,14 +519,18 @@ export default function PasajerosPage() {
 
             <div className="pt-6 border-t border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ShieldCheck size={14} className={p.ofac_status === 'Limpiado' || p.ofac_status === 'Clean' ? "text-green-400" : "text-amber-400"} />
-                <span className={`text-[10px] uppercase tracking-widest font-bold ${p.ofac_status === 'Limpiado' || p.ofac_status === 'Clean' ? "text-green-400" : "text-amber-400"}`}>
-                  {p.ofac_status === 'Limpiado' || p.ofac_status === 'Clean' ? "OFAC Clear" : "Verificando..."}
-                </span>
+                {p.ofac_status === 'Limpiado' || p.ofac_status === 'Clean' ? (
+                  <>
+                    <ShieldCheck size={14} className="text-green-400" />
+                    <span className="text-[10px] uppercase tracking-widest font-bold text-green-400">
+                      OFAC Clear
+                    </span>
+                  </>
+                ) : null}
               </div>
 
               <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
-                <span className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Explorador</span>
+                <span className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Pasajero</span>
               </div>
             </div>
           </motion.div>

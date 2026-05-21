@@ -18,6 +18,21 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
         return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
       case 'Cancelada':
         return 'bg-red-500/10 text-red-400 border-red-500/20';
+      case 'Solicitando Cancelación...':
+      case 'Solicitando Cancelación':
+      case 'Solicitando cancelación...':
+      case 'Solicitando cancelación':
+        return 'bg-red-500/10 text-red-400 border-red-500/20';
+      case 'Solicitando Upgrade...':
+      case 'Solicitando Upgrade':
+      case 'Solicitando upgrade...':
+      case 'Solicitando upgrade':
+        return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+      case 'Solicitando Modificación...':
+      case 'Solicitando Modificación':
+      case 'Solicitando modificar...':
+      case 'Solicitando modificar':
+        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
       default:
         return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     }

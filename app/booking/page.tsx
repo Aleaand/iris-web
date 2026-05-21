@@ -38,7 +38,14 @@ function BookingContent() {
   const [highlightReturn, setHighlightReturn] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const returnDateRef = useRef<HTMLInputElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    if (hasSearched && !searching) {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [searching, hasSearched]);
   const [isSelectingReturn, setIsSelectingReturn] = useState(false);
   const [subStep, setSubStep] = useState(1);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -222,11 +229,33 @@ function BookingContent() {
         seat_type: form.seat_type
       }).toString();
 
-      const data = isNearby ? await irisApi.searchFlightsNearby(query) : await irisApi.searchFlights(query);
-      setFlights(data.datos || []);
-      if ((data.datos || []).length === 0 && !isNearby) setShowNearby(true);
-    } catch (err) { console.error(err); }
-    setSearching(false);
+      // Intenta primero búsqueda exacta
+      const exactData = await irisApi.searchFlights(query);
+      let foundFlights = exactData.datos || [];
+
+      // Si no hay vuelos exactos, realiza búsqueda cercana de manera automática
+      if (foundFlights.length === 0) {
+        const nearbyData = await irisApi.searchFlightsNearby(query);
+        const nearbyFlights = nearbyData.datos || [];
+
+        if (nearbyFlights.length > 0) {
+          const targetTime = new Date(sDate).getTime();
+          foundFlights = [...nearbyFlights].sort((a, b) => {
+            const diffA = Math.abs(new Date(a.departure_date).getTime() - targetTime);
+            const diffB = Math.abs(new Date(b.departure_date).getTime() - targetTime);
+            return diffA - diffB;
+          });
+        }
+      }
+
+      setFlights(foundFlights);
+      setShowNearby(false); // Ya no se requiere banner manual
+    } catch (err) {
+      console.error(err);
+      setErrorPrompt("Error al conectar con el centro de control orbital.");
+    } finally {
+      setSearching(false);
+    }
   };
 
   const getNights = () => {
@@ -487,7 +516,7 @@ function BookingContent() {
   })();
 
   return (
-    <div className="pt-32 min-h-screen">
+    <div className="pt-16 min-h-screen">
       {/* Modal Antares */}
       <AnimatePresence>
         {showAntaresModal && (
@@ -817,14 +846,13 @@ function BookingContent() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
                     <button
                       onClick={() => setBookingMode('mission')}
-                      className={`group relative p-8 rounded-[2.5rem] border-2 transition-all duration-500 text-left overflow-hidden ${bookingMode === 'mission' ? 'border-purple-500 bg-purple-600/10 shadow-[0_0_40px_rgba(147,51,234,0.2)]' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
+                      className={`group relative p-8 rounded-[2.5rem] border transition-all duration-500 text-left overflow-hidden ${bookingMode === 'mission' ? 'border-blue-500 bg-blue-500/10 shadow-[0_0_30px_rgba(59,130,246,0.15)]' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
                     >
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/5 blur-3xl -z-10" />
                       <div className="flex justify-between items-center mb-6">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${bookingMode === 'mission' ? 'bg-purple-600 text-white' : 'bg-white/5 text-slate-500'}`}>
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${bookingMode === 'mission' ? 'bg-blue-600 text-white shadow-[0_0_20px_rgba(59,130,246,0.4)] font-bold' : 'bg-white/5 text-slate-500'}`}>
                           <Rocket size={24} />
                         </div>
-                        {bookingMode === 'mission' && <CheckCircle2 size={24} className="text-purple-400" />}
+                        {bookingMode === 'mission' && <CheckCircle2 size={24} className="text-blue-400" />}
                       </div>
                       <h4 className="text-2xl font-bold text-white mb-2">Misión Completa</h4>
                       <p className="text-xs text-slate-400 leading-relaxed">Reserva tus vuelos orbitales e incluye servicios personalizados de entrenamiento y logística.</p>
@@ -832,14 +860,13 @@ function BookingContent() {
 
                     <button
                       onClick={() => setBookingMode('services')}
-                      className={`group relative p-8 rounded-[2.5rem] border-2 transition-all duration-500 text-left overflow-hidden ${bookingMode === 'services' ? 'border-indigo-500 bg-indigo-600/10 shadow-[0_0_40px_rgba(79,70,229,0.2)]' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
+                      className={`group relative p-8 rounded-[2.5rem] border transition-all duration-500 text-left overflow-hidden ${bookingMode === 'services' ? 'border-purple-500 bg-purple-500/10 shadow-[0_0_30px_rgba(147,51,234,0.15)]' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
                     >
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/5 blur-3xl -z-10" />
                       <div className="flex justify-between items-center mb-6">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${bookingMode === 'services' ? 'bg-indigo-600 text-white' : 'bg-white/5 text-slate-500'}`}>
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${bookingMode === 'services' ? 'bg-purple-600 text-white shadow-[0_0_20px_rgba(147,51,234,0.4)] font-bold' : 'bg-white/5 text-slate-500'}`}>
                           <Zap size={24} />
                         </div>
-                        {bookingMode === 'services' && <CheckCircle2 size={24} className="text-indigo-400" />}
+                        {bookingMode === 'services' && <CheckCircle2 size={24} className="text-purple-400" />}
                       </div>
                       <h4 className="text-2xl font-bold text-white mb-2">Solo Servicios Extras</h4>
                       <p className="text-xs text-slate-400 leading-relaxed">Gestión de Pasaporte Estelar o Iris Training para exploradores que ya disponen de vuelo o desean prepararse.</p>
@@ -847,52 +874,113 @@ function BookingContent() {
                   </div>
 
                   {bookingMode === 'services' && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl bg-white/5 border border-white/10 rounded-[2.5rem] p-10 space-y-8">
-                      <div className="flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-3xl bg-indigo-600/20 flex items-center justify-center text-indigo-400"><Users size={32} /></div>
-                        <div>
-                          <h4 className="text-2xl font-bold text-white">Configuración de Pasajeros</h4>
-                          <p className="text-xs text-slate-400 uppercase font-black tracking-widest mt-1">¿Cuántos pasajeros solicitan servicios?</p>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="relative overflow-hidden bg-white/[0.04] backdrop-blur-xl border border-white/10 p-8 md:p-10 rounded-[2.5rem] shadow-xl w-full max-w-5xl mx-auto"
+                    >
+                      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-white/10">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300">
+                            <Users size={20} />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] block">Servicios Extras</span>
+                            <h2 className="text-xl font-bold text-white tracking-tight">Configura tu solicitud de servicios</h2>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 w-fit">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-[9px] font-black text-slate-300 uppercase tracking-wider">Sistemas de Aduanas Activos</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 bg-black/40 p-2 rounded-2xl border border-white/5">
-                        {[1, 2, 3, 4, 5].map(n => (
+                      {/* Rejilla de 2 Columnas */}
+                      <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8">
+                        {/* Columna Izquierda: Configuración de Pasajeros e Información */}
+                        <div className="md:col-span-7 space-y-6">
+                          <div className="relative group/field flex flex-col justify-between bg-white/[0.02] border border-white/10 rounded-3xl p-6 transition-all duration-300 shadow-inner">
+                            <div className="flex items-center gap-2 mb-4">
+                              <Users size={16} className="text-purple-400" />
+                              <label className="text-[10px] text-slate-400 uppercase font-black tracking-widest font-bold">Número de Exploradores</label>
+                            </div>
+                            <div className="flex items-center gap-2 bg-white/[0.02] p-1.5 rounded-2xl border border-white/10 w-full">
+                              {[1, 2, 3, 4, 5].map(n => (
+                                <button
+                                  key={n}
+                                  type="button"
+                                  onClick={() => setForm({ ...form, passengers_count: n })}
+                                  className={`flex-1 py-4 rounded-xl text-xs font-black transition-all duration-300 ${form.passengers_count === n ? 'bg-purple-600 text-white shadow-[0_0_20px_rgba(147,51,234,0.3)] font-bold' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                                >
+                                  {n} {n === 1 ? 'Explorador' : 'Exploradores'}
+                                </button>
+                              ))}
+                            </div>
+                            <p className="text-[10px] text-slate-500 mt-3 italic">
+                              * Selecciona la cantidad total de exploradores para los que tramitarás el Pasaporte Iris y el entrenamiento.
+                            </p>
+                          </div>
+
+                          <div className="bg-white/[0.01] border border-white/5 rounded-3xl p-6 space-y-4">
+                            <h5 className="text-xs font-black text-white uppercase tracking-wider">Beneficios Incluidos</h5>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                              <div className="flex gap-2">
+                                <Check size={14} className="text-purple-400 shrink-0 mt-0.5" />
+                                <div>
+                                  <p className="font-bold text-slate-300">Pasaporte Iris</p>
+                                  <p className="text-[10px] text-slate-500">Trámite de visas estelares y aduanas interplanetarias simplificado.</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Check size={14} className="text-purple-400 shrink-0 mt-0.5" />
+                                <div>
+                                  <p className="font-bold text-slate-300">Iris Training</p>
+                                  <p className="text-[10px] text-slate-500">Preparación psicológica y de gravedad cero con expertos.</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Columna Derecha: Tarjetas de Precios y CTA */}
+                        <div className="md:col-span-5 flex flex-col justify-between gap-6">
+                          <div className="space-y-4">
+                            <div className="p-5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.04] transition-all border border-white/10 flex justify-between items-center group/price">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                                  <ShieldCheck size={16} />
+                                </div>
+                                <div>
+                                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Pasaporte Iris</span>
+                                  <span className="text-[9px] text-slate-500 uppercase font-bold">Por explorador</span>
+                                </div>
+                              </div>
+                              <p className="text-2xl font-bold text-white tracking-tight">{(tariffs.passport_management || 2500).toLocaleString()}€</p>
+                            </div>
+
+                            <div className="p-5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.04] transition-all border border-white/10 flex justify-between items-center group/price">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                                  <Zap size={16} />
+                                </div>
+                                <div>
+                                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Iris Training</span>
+                                  <span className="text-[9px] text-slate-500 uppercase font-bold">Protocolo Completo</span>
+                                </div>
+                              </div>
+                              <p className="text-2xl font-bold text-white tracking-tight">{(tariffs.training || 50000).toLocaleString()}€</p>
+                            </div>
+                          </div>
+
                           <button
-                            key={n}
-                            onClick={() => setForm({ ...form, passengers_count: n })}
-                            className={`flex-1 py-4 rounded-xl text-xs font-black transition-all ${form.passengers_count === n ? 'bg-indigo-600 text-white shadow-xl' : 'bg-white/5 text-slate-500 hover:bg-white/10'}`}
+                            type="button"
+                            onClick={nextStep}
+                            className="w-full py-3.5 bg-white text-black hover:bg-slate-200 transition-all duration-300 rounded-full font-black text-[10px] uppercase tracking-[0.2em] shadow-xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98]"
                           >
-                            {n} {n === 1 ? 'Explorador' : 'Exploradores'}
+                            Continuar con la Solicitud <ArrowRight size={16} />
                           </button>
-                        ))}
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5">
-                          <div className="flex items-center gap-2 mb-2">
-                            <ShieldCheck size={14} className="text-indigo-400" />
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Pasaporte Iris</span>
-                          </div>
-                          <p className="text-2xl font-bold text-white">{(tariffs.passport_management || 2500).toLocaleString()}€</p>
-                          <p className="text-[8px] text-slate-500 uppercase font-bold mt-1">Por explorador</p>
-                        </div>
-                        <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Zap size={14} className="text-purple-400" />
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Iris Training</span>
-                          </div>
-                          <p className="text-2xl font-bold text-white">{(tariffs.training || 50000).toLocaleString()}€</p>
-                          <p className="text-[8px] text-slate-500 uppercase font-bold mt-1">Protocolo Completo</p>
                         </div>
                       </div>
-
-                      <button
-                        onClick={nextStep}
-                        className="w-full py-6 bg-white text-black rounded-full font-black text-xs uppercase tracking-[0.2em] hover:bg-indigo-600 hover:text-white transition-all shadow-2xl flex items-center justify-center gap-3"
-                      >
-                        Continuar con la Solicitud <ArrowRight size={18} />
-                      </button>
                     </motion.div>
                   )}
                 </div>
@@ -900,58 +988,119 @@ function BookingContent() {
                 {bookingMode === 'mission' && (
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-12">
 
-                    <div className="card-purple p-8 rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 items-end gap-6">
-                        <div className="space-y-3">
-                          <label className="text-[10px] text-purple-400 uppercase font-black tracking-[0.2em] ml-1">Origen</label>
-                          <select
-                            value={form.origin_id}
-                            onChange={e => setForm({ ...form, origin_id: e.target.value })}
-                            className="w-full bg-white/5 border border-white/10 text-white rounded-2xl p-4 text-xs outline-none focus:border-purple-500/50 transition-colors cursor-pointer"
-                          >
-                            <option value="" disabled className="bg-[#0d0a1a]">Selecciona</option>
-                            {destinations.map(d => (
-                              <option key={d.id} value={d.id.toString()} className="bg-[#0d0a1a]">{d.name}</option>
-                            ))}
-                          </select>
+                    <div className="relative overflow-hidden bg-white/[0.04] backdrop-blur-xl border border-white/10 p-8 md:p-10 rounded-[2.5rem] shadow-xl max-w-5xl mx-auto">
+                      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-white/10">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300">
+                            <Compass size={20} />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] block">Buscador</span>
+                            <h2 className="text-xl font-bold text-white tracking-tight">Configura tu reserva</h2>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 w-fit">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span className="text-[9px] font-black text-slate-300 uppercase tracking-wider">Sistemas Activos</span>
+                        </div>
+                      </div>
+
+                      <div className="relative z-10 space-y-6">
+                        {/* Fila 1: Origen, Destino y Pasajeros */}
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                          {/* Origen */}
+                          <div className="md:col-span-5 relative group/field flex flex-col justify-between h-20 bg-white/[0.02] hover:bg-white/[0.04] border border-white/10 focus-within:border-white/30 rounded-2xl px-5 py-3 transition-all duration-300 shadow-inner">
+                            <div className="flex items-center gap-2">
+                              <MapPin size={12} className="text-slate-400 group-hover/field:text-slate-200 transition-transform" />
+                              <label className="text-[9px] text-slate-400 uppercase font-black tracking-widest font-bold">Punto de Origen</label>
+                            </div>
+                            <select
+                              value={form.origin_id}
+                              onChange={e => setForm({ ...form, origin_id: e.target.value })}
+                              className="w-full bg-transparent text-white text-sm font-bold outline-none cursor-pointer pt-1 appearance-none relative z-10"
+                              style={{ colorScheme: 'dark' }}
+                            >
+                              <option value="" disabled className="bg-[#110e20] text-slate-400">Selecciona puerto...</option>
+                              {destinations.map(d => (
+                                <option key={d.id} value={d.id.toString()} className="bg-[#110e20] text-white">{d.name}</option>
+                              ))}
+                            </select>
+                            <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-[10px]">▼</div>
+                          </div>
+
+                          {/* Destino */}
+                          <div className="md:col-span-5 relative group/field flex flex-col justify-between h-20 bg-white/[0.02] hover:bg-white/[0.04] border border-white/10 focus-within:border-white/30 rounded-2xl px-5 py-3 transition-all duration-300 shadow-inner">
+                            <div className="flex items-center gap-2">
+                              <Rocket size={12} className="text-slate-400 group-hover/field:text-slate-200 transition-transform" />
+                              <label className="text-[9px] text-slate-400 uppercase font-black tracking-widest font-bold">Punto de Destino</label>
+                            </div>
+                            <select
+                              value={form.destination_id}
+                              onChange={e => setForm({ ...form, destination_id: e.target.value })}
+                              className="w-full bg-transparent text-white text-sm font-bold outline-none cursor-pointer pt-1 appearance-none relative z-10"
+                              style={{ colorScheme: 'dark' }}
+                            >
+                              <option value="" disabled className="bg-[#110e20] text-slate-400">Selecciona destino...</option>
+                              {destinations.filter(d => d.id.toString() !== form.origin_id).map(d => (
+                                <option key={d.id} value={d.id.toString()} className="bg-[#110e20] text-white">{d.name}</option>
+                              ))}
+                            </select>
+                            <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-[10px]">▼</div>
+                          </div>
+
+                          {/* Pasajeros */}
+                          <div className="md:col-span-2 relative group/field flex flex-col justify-between h-20 bg-white/[0.02] hover:bg-white/[0.04] border border-white/10 focus-within:border-white/30 rounded-2xl px-5 py-2 transition-all duration-300 shadow-inner">
+                            <div className="flex items-center gap-2">
+                              <Users size={12} className="text-slate-400 group-hover/field:text-slate-200 transition-transform" />
+                              <label className="text-[9px] text-slate-400 uppercase font-black tracking-widest font-bold">Pasajeros</label>
+                            </div>
+                            <div className="flex items-center justify-between w-full">
+                              <button
+                                onClick={() => setForm(f => ({ ...f, passengers_count: Math.max(1, f.passengers_count - 1) }))}
+                                className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/15 text-white transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/5"
+                              >
+                                <Minus size={12} />
+                              </button>
+                              <span className="text-white font-black text-sm">{form.passengers_count}</span>
+                              <button
+                                onClick={() => setForm(f => ({ ...f, passengers_count: Math.min(12, f.passengers_count + 1) }))}
+                                className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/15 text-white transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/5"
+                              >
+                                <Plus size={12} />
+                              </button>
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="space-y-3">
-                          <label className="text-[10px] text-purple-400 uppercase font-black tracking-[0.2em] ml-1">Destino</label>
-                          <select
-                            value={form.destination_id}
-                            onChange={e => setForm({ ...form, destination_id: e.target.value })}
-                            className="w-full bg-white/5 border border-white/10 text-white rounded-2xl p-4 text-xs outline-none focus:border-purple-500/50 transition-colors cursor-pointer"
-                          >
-                            <option value="" disabled className="bg-[#0d0a1a]">Selecciona</option>
-                            {destinations.filter(d => d.id.toString() !== form.origin_id).map(d => (
-                              <option key={d.id} value={d.id.toString()} className="bg-[#0d0a1a]">{d.name}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div className="space-y-3">
-                          <label className="text-[10px] text-purple-400 uppercase font-black tracking-[0.2em] ml-1">Salida</label>
-                          <div className="relative">
-                            <Calendar size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                        {/* Fila 2: Salida, Regreso y Buscar */}
+                        {/* Fila 2: Salida, Regreso */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Salida */}
+                          <div className="relative group/field flex flex-col justify-between h-20 bg-white/[0.02] hover:bg-white/[0.04] border border-white/10 focus-within:border-white/30 rounded-2xl px-5 py-3 transition-all duration-300 shadow-inner">
+                            <div className="flex items-center gap-2">
+                              <Calendar size={12} className="text-slate-400 group-hover/field:text-slate-200 transition-transform" />
+                              <label className="text-[9px] text-slate-400 uppercase font-black tracking-widest font-bold">Ventana de Salida</label>
+                            </div>
                             <input
                               type="date"
                               value={form.departure_date}
                               min={new Date().toISOString().split('T')[0]}
                               onClick={(e) => e.currentTarget.showPicker?.()}
                               onChange={e => setForm({ ...form, departure_date: e.target.value })}
-                              className="w-full bg-white/5 border border-white/10 text-white rounded-2xl p-4 pl-12 text-xs color-scheme-dark outline-none focus:border-purple-500/50 transition-colors"
+                              className="w-full bg-transparent text-white text-sm font-bold outline-none cursor-pointer pt-1"
+                              style={{ colorScheme: 'dark' }}
                             />
                           </div>
-                        </div>
 
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-center">
-                            <label className="text-[10px] text-purple-400 uppercase font-black tracking-[0.2em] ml-1">Regreso</label>
-                            <span className="text-[8px] text-slate-500 uppercase font-bold italic">Opcional</span>
-                          </div>
-                          <div className={`relative transition-all duration-300 ${highlightReturn ? 'scale-105 ring-2 ring-purple-500 rounded-2xl' : ''}`}>
-                            <Calendar size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                          {/* Regreso */}
+                          <div className={`relative group/field flex flex-col justify-between h-20 bg-white/[0.02] hover:bg-white/[0.04] border transition-all duration-300 rounded-2xl px-5 py-3 shadow-inner ${highlightReturn ? 'ring-2 ring-purple-500 border-purple-500 scale-[1.02]' : 'border-white/10 focus-within:border-white/30'}`}>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Calendar size={12} className="text-slate-400 group-hover/field:text-slate-200 transition-transform" />
+                                <label className="text-[9px] text-slate-400 uppercase font-black tracking-widest font-bold">Ventana de Regreso</label>
+                              </div>
+                              <span className="text-[8px] text-slate-500 uppercase font-bold italic">Opcional</span>
+                            </div>
                             <input
                               ref={returnDateRef}
                               type="date"
@@ -959,58 +1108,67 @@ function BookingContent() {
                               min={form.departure_date || new Date().toISOString().split('T')[0]}
                               onClick={(e) => e.currentTarget.showPicker?.()}
                               onChange={e => setForm({ ...form, return_date: e.target.value })}
-                              className={`w-full bg-white/5 border border-white/10 text-white rounded-2xl p-4 pl-12 text-xs color-scheme-dark outline-none focus:border-purple-500/50 transition-colors ${highlightReturn ? 'border-purple-500' : ''}`}
+                              className="w-full bg-transparent text-white text-sm font-bold outline-none cursor-pointer pt-1"
+                              style={{ colorScheme: 'dark' }}
                             />
                           </div>
                         </div>
 
-                        <div className="space-y-3">
-                          <label className="text-[10px] text-purple-400 uppercase font-black tracking-[0.2em] ml-1">Pasajeros</label>
-                          <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-2xl p-1 h-14">
-                            <button
-                              onClick={() => setForm(f => ({ ...f, passengers_count: Math.max(1, f.passengers_count - 1) }))}
-                              className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/10 text-white transition-colors"
-                            >
-                              <Minus size={14} />
-                            </button>
-                            <div className="flex flex-col items-center">
-                              <span className="text-white font-black text-sm">{form.passengers_count}</span>
-                            </div>
-                            <button
-                              onClick={() => setForm(f => ({ ...f, passengers_count: Math.min(12, f.passengers_count + 1) }))}
-                              className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/10 text-white transition-colors"
-                            >
-                              <Plus size={14} />
-                            </button>
-                          </div>
+                        {/* Botón Buscar Vuelo */}
+                        <div className="flex justify-end pt-4">
+                          <button
+                            onClick={() => handleSearch()}
+                            disabled={searching}
+                            className="w-full md:w-auto px-12 py-3.5 bg-white text-black hover:bg-slate-200 transition-all duration-300 rounded-full font-black text-[10px] uppercase tracking-[0.2em] shadow-xl flex items-center justify-center gap-3 disabled:opacity-50 group hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                          >
+                            {searching ? (
+                              <Loader2 className="animate-spin text-black" size={16} />
+                            ) : (
+                              <Search size={16} className="group-hover:scale-110 transition-transform text-black" />
+                            )}
+                            <span>Buscar Vuelo</span>
+                          </button>
                         </div>
-
-                        <button
-                          onClick={() => handleSearch()}
-                          disabled={searching}
-                          className="bg-white text-black h-14 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-purple-600 hover:text-white transition-all shadow-xl flex items-center justify-center gap-3 disabled:opacity-50 group"
-                        >
-                          {searching ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} className="group-hover:scale-110 transition-transform" />}
-                          <span>Buscar</span>
-                        </button>
                       </div>
                     </div>
 
+                    <div ref={resultsRef} className="scroll-mt-24" />
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      {visibleFlights.map(v => (
-                        <motion.div
-                          key={v.id}
-                          whileHover={{ y: -5, scale: 1.02 }}
-                          onClick={() => !isSelectingReturn ? setSelection({ ...selection, outboundFlight: v }) : setSelection({ ...selection, returnFlight: v })}
-                          className={`relative p-8 rounded-[2.5rem] cursor-pointer transition-all duration-500 border-2 overflow-hidden group ${(selection.outboundFlight?.id === v.id || selection.returnFlight?.id === v.id)
-                            ? 'border-purple-500 bg-purple-600/20 shadow-[0_0_40px_rgba(147,51,234,0.3)]'
-                            : 'border-white/20 bg-white/10 hover:border-white/40 hover:bg-white/[0.15] backdrop-blur-sm shadow-xl'
-                            }`}
-                        >
-                          <div className="relative z-10">
-                            <div className="flex justify-between items-start mb-8">
-                              <div className="space-y-1">
-                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-[0.2em]">{v.code}</span>
+                      {visibleFlights.map(v => {
+                        const isExact = (() => {
+                          const target = isSelectingReturn ? form.return_date : form.departure_date;
+                          if (!target) return true;
+                          try {
+                            const fDate = new Date(v.departure_date).toISOString().split('T')[0];
+                            const tDate = new Date(target).toISOString().split('T')[0];
+                            return fDate === tDate;
+                          } catch (e) {
+                            return true;
+                          }
+                        })();
+
+                        return (
+                          <motion.div
+                            key={v.id}
+                            whileHover={{ y: -5, scale: 1.02 }}
+                            onClick={() => !isSelectingReturn ? setSelection({ ...selection, outboundFlight: v }) : setSelection({ ...selection, returnFlight: v })}
+                            className={`relative p-8 rounded-[2.5rem] cursor-pointer transition-all duration-500 border-2 overflow-hidden group ${(selection.outboundFlight?.id === v.id || selection.returnFlight?.id === v.id)
+                              ? 'border-purple-500 bg-purple-600/20 shadow-[0_0_40px_rgba(147,51,234,0.3)]'
+                              : 'border-white/20 bg-white/10 hover:border-white/40 hover:bg-white/[0.15] backdrop-blur-sm shadow-xl'
+                              }`}
+                          >
+                            <div className="relative z-10">
+                              <div className="flex justify-between items-start mb-8">
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-black text-purple-400 uppercase tracking-[0.2em]">{v.code}</span>
+                                    {!isExact && (
+                                      <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[7px] font-black uppercase tracking-widest rounded-md flex items-center gap-1">
+                                        <Calendar size={8} className="shrink-0" /> Fecha Cercana
+                                      </span>
+                                    )}
+                                  </div>
                                 <h3 className="text-4xl font-bold text-white tracking-tighter">{v.destination_name || v.destination?.name || 'Destino Desconocido'}</h3>
                               </div>
                               <div className="text-right">
@@ -1045,7 +1203,7 @@ function BookingContent() {
                           </div>
                           <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-purple-600/10 blur-[60px] rounded-full group-hover:bg-purple-600/20 transition-all duration-700" />
                         </motion.div>
-                      ))}
+                      )})}
                     </div>
 
                     {visibleFlights.length === 0 && !searching && hasSearched && (
@@ -1070,12 +1228,7 @@ function BookingContent() {
                       </motion.div>
                     )}
 
-                    {showNearby && flights.length === 0 && (
-                      <div className="mt-8 p-8 rounded-3xl bg-purple-600/5 border border-purple-500/20 text-center">
-                        <p className="text-purple-300 font-bold mb-4">¿No encuentras lo que buscas? Mostramos opciones cercanas:</p>
-                        <button onClick={() => { handleSearch(true); setShowNearby(false); }} className="px-8 py-3 bg-purple-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest">Ver fechas cercanas</button>
-                      </div>
-                    )}
+
 
                     {selection.outboundFlight && (
                       <div className="flex justify-center gap-4 mt-12">
@@ -1091,11 +1244,11 @@ function BookingContent() {
                                   setIsSelectingReturn(true);
                                   handleSearch(false, true);
                                 }}
-                                className="px-10 py-5 bg-white text-black rounded-full font-bold text-[10px] uppercase hover:bg-purple-600 hover:text-white transition-all shadow-xl"
+                                className="px-10 py-3.5 bg-white text-black rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-200 transition-all duration-300 shadow-xl hover:scale-[1.02] active:scale-[0.98]"
                               >
                                 Añadir Regreso
                               </button>
-                              <button onClick={nextStep} className="px-10 py-5 border border-white/10 text-white rounded-full font-bold text-[10px] uppercase hover:bg-white/10 transition-all">
+                              <button onClick={nextStep} className="px-10 py-3.5 border border-white/10 text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
                                 Continuar sin regreso
                               </button>
                             </div>
@@ -1103,11 +1256,11 @@ function BookingContent() {
                         )}
                         {isSelectingReturn && (
                           <div className="flex gap-4">
-                            <button onClick={() => { setIsSelectingReturn(false); handleSearch(); }} className="px-10 py-5 border border-white/10 text-white rounded-full font-bold text-[10px] uppercase hover:bg-white/10 transition-all">
+                            <button onClick={() => { setIsSelectingReturn(false); handleSearch(); }} className="px-10 py-3.5 border border-white/10 text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
                               Cambiar Salida
                             </button>
                             {selection.returnFlight && (
-                              <button onClick={nextStep} className="px-12 py-5 bg-white text-black rounded-full font-bold text-[10px] uppercase hover:bg-purple-600 hover:text-white transition-all shadow-xl">
+                              <button onClick={nextStep} className="px-12 py-3.5 bg-white text-black rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-200 transition-all duration-300 shadow-xl hover:scale-[1.02] active:scale-[0.98]">
                                 Confirmar Selección
                               </button>
                             )}
@@ -1210,8 +1363,8 @@ function BookingContent() {
                 </div>
 
                 <div className="flex justify-center gap-6 mt-12">
-                  <button onClick={prevStep} className="px-10 py-5 text-slate-500 uppercase font-black text-[10px] tracking-widest hover:text-white transition-colors">Volver</button>
-                  <button onClick={nextStep} className="px-16 py-5 bg-white text-black rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-purple-600 hover:text-white transition-all shadow-2xl">
+                  <button onClick={prevStep} className="px-10 py-3.5 text-slate-500 uppercase font-black text-[10px] tracking-widest hover:text-white transition-colors duration-300">Volver</button>
+                  <button onClick={nextStep} className="px-16 py-3.5 bg-white text-black rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-200 transition-all duration-300 shadow-2xl hover:scale-[1.02] active:scale-[0.98]">
                     {selection.package === 'antares' ? 'Configurar Contacto' : 'Continuar'}
                   </button>
                 </div>
@@ -1228,14 +1381,13 @@ function BookingContent() {
                   {selection.passengerData.map((p: any, i: number) => (
                     <motion.div
                       key={i}
-                      className={`card-purple p-10 rounded-[4rem] border transition-all duration-500 relative overflow-hidden ${editingIndex === i ? 'border-purple-500/50 bg-black/60' : 'border-white/10 bg-black/40'
-                        }`}
+                      className={`p-10 rounded-[3rem] border transition-all duration-500 relative overflow-hidden ${editingIndex === i ? 'border-white/30 bg-white/[0.04] backdrop-blur-xl' : 'border-white/10 bg-white/[0.02]'}`}
                     >
                       <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none"><Users size={180} /></div>
 
                       <div className="flex justify-between items-center mb-8 pb-6 border-b border-white/5">
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-colors ${editingIndex === i ? 'bg-purple-600 text-white border-purple-400' : 'bg-white/5 text-purple-400 border-white/10'}`}>
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-colors ${editingIndex === i ? 'bg-white text-black border-white shadow-md' : 'bg-white/5 text-slate-400 border-white/10'}`}>
                             <User size={24} />
                           </div>
                           <div>
@@ -1256,9 +1408,9 @@ function BookingContent() {
 
                       {editingIndex === i ? (
                         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-12">
-                          <div className="p-10 rounded-[3rem] bg-purple-600/5 border border-purple-500/20 relative overflow-hidden">
+                          <div className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/10 relative overflow-hidden shadow-inner">
                             <div className="relative z-10">
-                              <p className="text-[10px] text-purple-400 uppercase font-black tracking-[0.3em] mb-8 flex items-center gap-2">
+                              <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-8 flex items-center gap-2">
                                 <Users size={14} /> ¿Quién nos acompaña?
                               </p>
 
@@ -1282,9 +1434,9 @@ function BookingContent() {
                                         };
                                         setSelection({ ...selection, passengerData: d });
                                       }}
-                                      className="group p-4 rounded-3xl bg-white/5 border border-white/10 hover:border-purple-500 hover:bg-purple-600/10 transition-all text-left"
+                                      className="group p-4 rounded-3xl bg-white/[0.02] border border-white/10 hover:border-white hover:bg-white/5 transition-all text-left"
                                     >
-                                      <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 group-hover:bg-purple-600 group-hover:text-white mb-3 transition-colors">
+                                      <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 group-hover:bg-white group-hover:text-black mb-3 transition-colors">
                                         <User size={18} />
                                       </div>
                                       <p className="text-[10px] text-white font-bold truncate">{up.nombre || up.name}</p>
@@ -1307,23 +1459,23 @@ function BookingContent() {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             <div className="space-y-2">
                               <label className="text-[8px] text-slate-500 uppercase font-black tracking-widest ml-1">Nombre *</label>
-                              <input value={p.name || ""} disabled={p.fromManifesto} onChange={e => { const d = [...selection.passengerData]; d[i].name = e.target.value; setSelection({ ...selection, passengerData: d }); }} placeholder="Nombre" className={`w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-purple-500/50 ${p.fromManifesto ? 'opacity-50 cursor-not-allowed' : ''}`} />
+                              <input value={p.name || ""} disabled={p.fromManifesto} onChange={e => { const d = [...selection.passengerData]; d[i].name = e.target.value; setSelection({ ...selection, passengerData: d }); }} placeholder="Nombre" className={`w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-white/30 ${p.fromManifesto ? 'opacity-50 cursor-not-allowed' : ''}`} />
                             </div>
                             <div className="space-y-2">
                               <label className="text-[8px] text-slate-500 uppercase font-black tracking-widest ml-1">Primer Apellido *</label>
-                              <input value={p.primarylastname || ""} disabled={p.fromManifesto} onChange={e => { const d = [...selection.passengerData]; d[i].primarylastname = e.target.value; setSelection({ ...selection, passengerData: d }); }} placeholder="Primer Apellido" className={`w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-purple-500/50 ${p.fromManifesto ? 'opacity-50 cursor-not-allowed' : ''}`} />
+                              <input value={p.primarylastname || ""} disabled={p.fromManifesto} onChange={e => { const d = [...selection.passengerData]; d[i].primarylastname = e.target.value; setSelection({ ...selection, passengerData: d }); }} placeholder="Primer Apellido" className={`w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-white/30 ${p.fromManifesto ? 'opacity-50 cursor-not-allowed' : ''}`} />
                             </div>
                             <div className="space-y-2">
                               <label className="text-[8px] text-slate-500 uppercase font-black tracking-widest ml-1">Segundo Apellido</label>
-                              <input value={p.secondarylastname || ""} disabled={p.fromManifesto} onChange={e => { const d = [...selection.passengerData]; d[i].secondarylastname = e.target.value; setSelection({ ...selection, passengerData: d }); }} placeholder="Segundo Apellido" className={`w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-purple-500/50 ${p.fromManifesto ? 'opacity-50 cursor-not-allowed' : ''}`} />
+                              <input value={p.secondarylastname || ""} disabled={p.fromManifesto} onChange={e => { const d = [...selection.passengerData]; d[i].secondarylastname = e.target.value; setSelection({ ...selection, passengerData: d }); }} placeholder="Segundo Apellido" className={`w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-white/30 ${p.fromManifesto ? 'opacity-50 cursor-not-allowed' : ''}`} />
                             </div>
                             <div className="space-y-2">
                               <label className="text-[8px] text-slate-500 uppercase font-black tracking-widest ml-1">Documento (ID) *</label>
-                              <input value={p.document_number || ""} disabled={p.fromManifesto} onChange={e => { const d = [...selection.passengerData]; d[i].document_number = e.target.value; setSelection({ ...selection, passengerData: d }); }} placeholder="DNI / Pasaporte" className={`w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-purple-500/50 ${p.fromManifesto ? 'opacity-50 cursor-not-allowed' : ''}`} />
+                              <input value={p.document_number || ""} disabled={p.fromManifesto} onChange={e => { const d = [...selection.passengerData]; d[i].document_number = e.target.value; setSelection({ ...selection, passengerData: d }); }} placeholder="DNI / Pasaporte" className={`w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-white/30 ${p.fromManifesto ? 'opacity-50 cursor-not-allowed' : ''}`} />
                             </div>
                             <div className="space-y-2">
                               <label className="text-[8px] text-slate-500 uppercase font-black tracking-widest ml-1">País *</label>
-                              <select value={p.document_country || ""} disabled={p.fromManifesto} onChange={e => { const d = [...selection.passengerData]; d[i].document_country = e.target.value; setSelection({ ...selection, passengerData: d }); }} className={`w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-purple-500/50 appearance-none ${p.fromManifesto ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                              <select value={p.document_country || ""} disabled={p.fromManifesto} onChange={e => { const d = [...selection.passengerData]; d[i].document_country = e.target.value; setSelection({ ...selection, passengerData: d }); }} className={`w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-white/30 appearance-none ${p.fromManifesto ? 'opacity-50 cursor-not-allowed' : ''}`} style={{ colorScheme: 'dark' }}>
                                 <option value="" disabled>Selecciona País</option>
                                 {locations.map(loc => (
                                   <option key={loc.id} value={loc.country_code || loc.name} className="bg-[#0d0a1a]">
@@ -1334,15 +1486,15 @@ function BookingContent() {
                             </div>
                             <div className="space-y-2">
                               <label className="text-[8px] text-slate-500 uppercase font-black tracking-widest ml-1">Fecha Nacimiento *</label>
-                              <input type="date" value={p.birth_date || ""} disabled={p.fromManifesto} onClick={(e) => e.currentTarget.showPicker?.()} onChange={e => { const d = [...selection.passengerData]; d[i].birth_date = e.target.value; setSelection({ ...selection, passengerData: d }); }} className={`w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-purple-500/50 color-scheme-dark ${p.fromManifesto ? 'opacity-50 cursor-not-allowed' : ''}`} />
+                              <input type="date" value={p.birth_date || ""} disabled={p.fromManifesto} onClick={(e) => e.currentTarget.showPicker?.()} onChange={e => { const d = [...selection.passengerData]; d[i].birth_date = e.target.value; setSelection({ ...selection, passengerData: d }); }} className={`w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-white/30 ${p.fromManifesto ? 'opacity-50 cursor-not-allowed' : ''}`} style={{ colorScheme: 'dark' }} />
                             </div>
                           </div>
 
                           <div className="p-6 rounded-3xl bg-white/5 border border-white/5">
                             <label className="flex items-start gap-4 cursor-pointer group">
-                              <div className={`mt-1 w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${!!p.compliance ? 'bg-purple-600 border-purple-600' : 'border-white/20 group-hover:border-purple-500'}`}>
+                              <div className={`mt-1 w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${!!p.compliance ? 'bg-white border-white' : 'border-white/20 group-hover:border-white/40'}`}>
                                 <input type="checkbox" checked={!!p.compliance} onChange={e => { const d = [...selection.passengerData]; d[i].compliance = e.target.checked; setSelection({ ...selection, passengerData: d }); }} className="sr-only" />
-                                {!!p.compliance && <Check size={12} className="text-white" />}
+                                {!!p.compliance && <Check size={12} className="text-black" />}
                               </div>
                               <p className="text-[10px] text-slate-500 leading-relaxed">
                                 Autorizo el <span className="text-white font-bold">tratamiento de datos </span> para la validación de seguridad orbital y cumplimiento del protocolo de vuelo de Iris Aerospace.
@@ -1385,7 +1537,7 @@ function BookingContent() {
                                 }
                               }}
                               disabled={savingPassenger === i || !p.compliance}
-                              className="px-12 py-5 bg-purple-600 text-white rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all shadow-2xl disabled:opacity-50"
+                              className="px-12 py-5 bg-white text-black hover:bg-slate-200 rounded-full font-black text-[10px] uppercase tracking-widest transition-all shadow-xl disabled:opacity-50"
                             >
                               {savingPassenger === i ? <Loader2 size={16} className="animate-spin" /> : "Añadir Pasajero"}
                             </button>
@@ -1394,7 +1546,7 @@ function BookingContent() {
                       ) : (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                           <div className="space-y-4">
-                            <p className="text-[10px] text-purple-400 uppercase font-black tracking-[0.2em] ml-1">Servicios Solicitados</p>
+                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest ml-1">Servicios Solicitados</p>
                             <div className="grid grid-cols-2 gap-4">
                               <button
                                 onClick={() => {
@@ -1402,29 +1554,29 @@ function BookingContent() {
                                   d[i].training_mode = d[i].training_mode === 'request' ? 'none' : 'request';
                                   setSelection({ ...selection, passengerData: d });
                                 }}
-                                className={`p-6 rounded-[2.5rem] border-2 text-left transition-all duration-500 flex flex-col justify-between h-44 relative ${p.training_mode === 'request' ? 'border-purple-500 bg-purple-600/10 shadow-[0_0_30px_rgba(147,51,234,0.2)]' : 'border-white/5 bg-white/5 hover:border-white/10'}`}
+                                className={`p-6 rounded-[2.5rem] border transition-all duration-500 flex flex-col justify-between h-44 relative ${p.training_mode === 'request' ? 'border-white bg-white/[0.06] shadow-lg' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
                               >
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${p.training_mode === 'request' ? 'bg-purple-600 text-white' : 'bg-white/5 text-slate-500'}`}><Zap size={20} /></div>
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 ${p.training_mode === 'request' ? 'bg-white text-black shadow-md font-bold' : 'bg-white/5 text-slate-500'}`}><Zap size={20} /></div>
                                 <div><h4 className="text-white font-bold text-sm mb-1">Iris Training</h4><p className="text-[9px] text-slate-500 uppercase font-black">{(tariffs.training || 50000).toLocaleString()}€</p></div>
-                                {p.training_mode === 'request' && <div className="absolute top-4 right-4 text-purple-400"><CheckCircle2 size={16} /></div>}
+                                {p.training_mode === 'request' && <div className="absolute top-4 right-4 text-white"><CheckCircle2 size={16} /></div>}
                               </button>
 
                               <button
                                 onClick={() => { const d = [...selection.passengerData]; d[i].passport_mode = d[i].passport_mode === 'request' ? 'none' : 'request'; setSelection({ ...selection, passengerData: d }); }}
-                                className={`p-6 rounded-[2.5rem] border-2 text-left transition-all duration-500 flex flex-col justify-between h-44 relative ${p.passport_mode === 'request' ? 'border-indigo-500 bg-indigo-600/10 shadow-[0_0_30px_rgba(79,70,229,0.2)]' : 'border-white/5 bg-white/5 hover:border-white/10'}`}
+                                className={`p-6 rounded-[2.5rem] border transition-all duration-500 flex flex-col justify-between h-44 relative ${p.passport_mode === 'request' ? 'border-white bg-white/[0.06] shadow-lg' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
                               >
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${p.passport_mode === 'request' ? 'bg-indigo-600 text-white' : 'bg-white/5 text-slate-500'}`}><ShieldCheck size={20} /></div>
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 ${p.passport_mode === 'request' ? 'bg-white text-black shadow-md font-bold' : 'bg-white/5 text-slate-500'}`}><ShieldCheck size={20} /></div>
                                 <div><h4 className="text-white font-bold text-sm mb-1">Pasaporte Estelar</h4><p className="text-[9px] text-slate-500 uppercase font-black">{(tariffs.passport_management || 2500).toLocaleString()}€</p></div>
-                                {p.passport_mode === 'request' && <div className="absolute top-4 right-4 text-indigo-400"><CheckCircle2 size={16} /></div>}
+                                {p.passport_mode === 'request' && <div className="absolute top-4 right-4 text-white"><CheckCircle2 size={16} /></div>}
                               </button>
                             </div>
 
                             {p.training_mode === 'request' && (
                               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-6 pt-4">
-                                <div className="p-8 rounded-[2.5rem] bg-purple-600/5 border border-purple-500/20">
+                                <div className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/10 shadow-inner">
                                   <div className="flex justify-between items-center mb-6">
-                                    <p className="text-[10px] text-purple-300 uppercase font-black tracking-widest flex items-center gap-2"><Calendar size={12} /> Planificación de Sesiones</p>
-                                    <p className="text-[9px] text-purple-400 font-bold uppercase tracking-widest">Programación Obligatoria *</p>
+                                    <p className="text-[10px] text-slate-300 uppercase font-black tracking-widest flex items-center gap-2"><Calendar size={12} /> Planificación de Sesiones</p>
+                                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Programación Obligatoria *</p>
                                   </div>
 
                                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1442,7 +1594,8 @@ function BookingContent() {
                                               d[i].training_dates[idx] = e.target.value;
                                               setSelection({ ...selection, passengerData: d });
                                             }}
-                                            className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-[11px] text-white outline-none focus:border-purple-500 color-scheme-dark"
+                                            className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-[11px] text-white outline-none focus:border-white/30"
+                                            style={{ colorScheme: 'dark' }}
                                           />
                                           {idx > 0 && (
                                             <button
@@ -1459,7 +1612,7 @@ function BookingContent() {
                                       <div className="flex items-end">
                                         <button
                                           onClick={() => { const d = [...selection.passengerData]; d[i].training_dates.push(""); setSelection({ ...selection, passengerData: d }); }}
-                                          className="w-full h-[52px] border border-dashed border-purple-500/30 rounded-2xl flex items-center justify-center gap-2 text-purple-400 hover:bg-purple-500/10 transition-all text-[9px] uppercase font-black tracking-widest"
+                                          className="w-full h-[52px] border border-dashed border-white/20 rounded-2xl flex items-center justify-center gap-2 text-slate-400 hover:bg-white/5 transition-all text-[9px] uppercase font-black tracking-widest"
                                         >
                                           <Plus size={12} /> Añadir Sesión
                                         </button>
@@ -1476,7 +1629,8 @@ function BookingContent() {
                                           d[i].training_city = e.target.value;
                                           setSelection({ ...selection, passengerData: d });
                                         }}
-                                        className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-[11px] text-white outline-none focus:border-purple-500 appearance-none"
+                                        className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-[11px] text-white outline-none focus:border-white/30 appearance-none"
+                                        style={{ colorScheme: 'dark' }}
                                       >
                                         <option value="">Seleccionar ciudad...</option>
                                         {locations.map(loc => (
@@ -1486,7 +1640,7 @@ function BookingContent() {
                                     </div>
                                     <div className="flex items-center">
                                       <p className="text-[10px] text-slate-500 italic leading-relaxed border-l border-white/10 pl-6">
-                                        <span className="text-purple-400 font-bold uppercase text-[8px] block mb-1">Sugerencia</span>
+                                        <span className="text-slate-400 font-bold uppercase text-[8px] block mb-1">Sugerencia</span>
                                         Realizar el entrenamiento unos días antes del lanzamiento en la ciudad de origen ({selection.outboundFlight?.origin_name || 'TBD'}).
                                       </p>
                                     </div>
@@ -1496,7 +1650,7 @@ function BookingContent() {
                             )}
                             {(p.training_mode === 'request' || p.passport_mode === 'request') && (
                               <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex items-start gap-3">
-                                <Activity size={14} className="text-purple-400 shrink-0 mt-0.5" />
+                                <Activity size={14} className="text-slate-400 shrink-0 mt-0.5" />
                                 <p className="text-[10px] text-slate-400 leading-relaxed font-medium">
                                   <span className="text-white font-bold">Aviso:</span> Es obligatorio contar con entrenamiento y pasaporte estelar validado para realizar el lanzamiento.
                                 </p>
@@ -1509,8 +1663,8 @@ function BookingContent() {
                               <h4 className="text-xs font-black text-white uppercase tracking-widest">Información</h4>
                               <div className="space-y-2">
                                 {bookingMode === 'mission' && <div className="flex justify-between text-[10px] text-slate-400"><span>Vuelo Base ({form.seat_type})</span><span className="text-white">{((selection.outboundFlight?.base_price || 0) * (form.seat_type === 'Supernova' ? 2.5 : 1)).toLocaleString()}€</span></div>}
-                                {p.training_mode === 'request' && <div className="flex justify-between text-[10px] text-purple-400 font-bold"><span>Iris Training</span><span>{(tariffs.training || 50000).toLocaleString()}€</span></div>}
-                                {p.passport_mode === 'request' && <div className="flex justify-between text-[10px] text-indigo-400 font-bold"><span>Pasaporte Estelar</span><span>{(tariffs.passport_management || 2500).toLocaleString()}€</span></div>}
+                                {p.training_mode === 'request' && <div className="flex justify-between text-[10px] text-slate-400 font-bold"><span>Iris Training</span><span>{(tariffs.training || 50000).toLocaleString()}€</span></div>}
+                                {p.passport_mode === 'request' && <div className="flex justify-between text-[10px] text-slate-400 font-bold"><span>Pasaporte Estelar</span><span>{(tariffs.passport_management || 2500).toLocaleString()}€</span></div>}
                               </div>
                             </div>
                             <div className="pt-6 border-t border-white/10 flex justify-between items-end">
@@ -1528,8 +1682,8 @@ function BookingContent() {
                   ))}
                 </div>
                 <div className="flex justify-center gap-6 mt-12">
-                  <button onClick={prevStep} className="px-10 py-5 text-slate-500 uppercase font-black text-[10px] tracking-widest hover:text-white transition-colors">Volver</button>
-                  <button onClick={nextStep} className="px-16 py-5 bg-white text-black rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-purple-600 hover:text-white transition-all shadow-2xl">Continuar</button>
+                  <button onClick={prevStep} className="px-10 py-3.5 text-slate-500 uppercase font-black text-[10px] tracking-widest hover:text-white transition-colors duration-300">Volver</button>
+                  <button onClick={nextStep} className="px-16 py-3.5 bg-white text-black rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-200 transition-all duration-300 shadow-2xl hover:scale-[1.02] active:scale-[0.98]">Continuar</button>
                 </div>
               </motion.div>
             )}
@@ -1651,8 +1805,8 @@ function BookingContent() {
                 </div>
 
                 <div className="flex justify-center gap-6 mt-12">
-                  <button onClick={() => setStep(3)} className="px-10 py-5 text-slate-500 uppercase font-black text-[10px] tracking-widest hover:text-white transition-colors">Volver</button>
-                  <button onClick={() => setStep(5)} className="px-16 py-5 bg-white text-black rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-purple-600 hover:text-white transition-all shadow-2xl">Continuar</button>
+                  <button onClick={() => setStep(3)} className="px-10 py-3.5 text-slate-500 uppercase font-black text-[10px] tracking-widest hover:text-white transition-colors duration-300">Volver</button>
+                  <button onClick={() => setStep(5)} className="px-16 py-3.5 bg-white text-black rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-200 transition-all duration-300 shadow-2xl hover:scale-[1.02] active:scale-[0.98]">Continuar</button>
                 </div>
               </motion.div>
             )}
@@ -1712,6 +1866,7 @@ function BookingContent() {
                             value={selection.hotelSearch.city}
                             onChange={e => setSelection({ ...selection, hotelSearch: { ...selection.hotelSearch, city: e.target.value } })}
                             className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-purple-500 appearance-none"
+                            style={{ colorScheme: 'dark' }}
                           >
                             <option value="">Seleccionar ciudad...</option>
                             {locations.map(loc => (
@@ -1727,7 +1882,8 @@ function BookingContent() {
                             min={new Date().toISOString().split('T')[0]}
                             onClick={(e) => e.currentTarget.showPicker?.()}
                             onChange={e => setSelection({ ...selection, hotelSearch: { ...selection.hotelSearch, from: e.target.value } })}
-                            className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-purple-500 color-scheme-dark"
+                            className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-purple-500"
+                            style={{ colorScheme: 'dark' }}
                           />
                         </div>
                         <div className="space-y-2">
@@ -1738,7 +1894,8 @@ function BookingContent() {
                             min={selection.hotelSearch.from || new Date().toISOString().split('T')[0]}
                             onClick={(e) => e.currentTarget.showPicker?.()}
                             onChange={e => setSelection({ ...selection, hotelSearch: { ...selection.hotelSearch, to: e.target.value } })}
-                            className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-purple-500 color-scheme-dark"
+                            className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-purple-500"
+                            style={{ colorScheme: 'dark' }}
                           />
                         </div>
                       </div>
@@ -1816,6 +1973,7 @@ function BookingContent() {
                             value={selection.terrestrialSearch.origin}
                             onChange={e => setSelection({ ...selection, terrestrialSearch: { ...selection.terrestrialSearch, origin: e.target.value } })}
                             className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-blue-500 appearance-none"
+                            style={{ colorScheme: 'dark' }}
                           >
                             <option value="">Seleccionar origen...</option>
                             {locations.map(loc => (
@@ -1829,6 +1987,7 @@ function BookingContent() {
                             value={selection.terrestrialSearch.destination}
                             onChange={e => setSelection({ ...selection, terrestrialSearch: { ...selection.terrestrialSearch, destination: e.target.value } })}
                             className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-blue-500 appearance-none"
+                            style={{ colorScheme: 'dark' }}
                           >
                             <option value="">Seleccionar destino...</option>
                             {locations.map(loc => (
@@ -1842,7 +2001,8 @@ function BookingContent() {
                             type="date"
                             value={selection.terrestrialSearch.date}
                             onChange={e => setSelection({ ...selection, terrestrialSearch: { ...selection.terrestrialSearch, date: e.target.value } })}
-                            className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-blue-500 color-scheme-dark"
+                            className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-blue-500"
+                            style={{ colorScheme: 'dark' }}
                           />
                         </div>
                       </div>
@@ -1862,6 +2022,7 @@ function BookingContent() {
                           value={selection.transferSearch.city}
                           onChange={e => setSelection({ ...selection, transferSearch: { ...selection.transferSearch, city: e.target.value } })}
                           className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-green-500 appearance-none text-center"
+                          style={{ colorScheme: 'dark' }}
                         >
                           <option value="">Elegir ciudad...</option>
                           {locations.map(loc => (
@@ -1971,8 +2132,8 @@ function BookingContent() {
                 </div>
 
                 <div className="flex justify-center gap-6 mt-12">
-                  <button onClick={prevStep} className="px-10 py-5 text-slate-500 uppercase font-black text-[10px] tracking-widest hover:text-white transition-colors">Volver</button>
-                  <button onClick={() => setStep(6)} className="px-16 py-5 bg-white text-black rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-purple-600 hover:text-white transition-all shadow-2xl">Revisar Reserva Final</button>
+                  <button onClick={prevStep} className="px-10 py-3.5 text-slate-500 uppercase font-black text-[10px] tracking-widest hover:text-white transition-colors duration-300">Volver</button>
+                  <button onClick={() => setStep(6)} className="px-16 py-3.5 bg-white text-black rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-200 transition-all duration-300 shadow-2xl hover:scale-[1.02] active:scale-[0.98]">Revisar Reserva Final</button>
                 </div>
               </motion.div>
             )}
@@ -2114,8 +2275,8 @@ function BookingContent() {
                       <p className="text-6xl font-black text-white tracking-tighter">{getTotal().toLocaleString()}€</p>
                     </div>
                     <div className="flex gap-4">
-                      <button onClick={prevStep} className="px-8 py-4 text-slate-500 uppercase font-black text-[10px] tracking-widest hover:text-white transition-colors">Volver</button>
-                      <button onClick={handleBooking} disabled={isCreating} className="px-12 py-5 bg-purple-600 text-white rounded-full font-black text-xs uppercase tracking-widest hover:bg-purple-500 transition-all shadow-[0_0_40px_rgba(147,51,234,0.3)] disabled:opacity-50">
+                      <button onClick={prevStep} className="px-8 py-3.5 text-slate-500 uppercase font-black text-[10px] tracking-widest hover:text-white transition-colors duration-300">Volver</button>
+                      <button onClick={handleBooking} disabled={isCreating} className="px-12 py-3.5 bg-purple-600 text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-purple-500 transition-all duration-300 shadow-[0_0_30px_rgba(147,51,234,0.3)] disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]">
                         {isCreating ? 'Procesando Misión...' : 'Confirmar Reserva'}
                       </button>
                     </div>
