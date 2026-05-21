@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import Starfield from "@/components/Starfield";
 import { Mail, AlertCircle, Rocket, ChevronLeft, CheckCircle2 } from "lucide-react";
 import { irisApi } from "@/lib/api";
 
@@ -41,9 +40,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="min-h-screen relative overflow-hidden bg-[#06040d] flex items-center justify-center px-6">
-      <Starfield />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 aurora-blur rounded-full pointer-events-none" />
+    <main className="min-h-screen relative overflow-hidden bg-[#110e20] flex items-center justify-center px-6">      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 aurora-blur rounded-full pointer-events-none" />
 
       {/* Simulación de Email de Notificación */}
       {success && debugToken && (

@@ -148,7 +148,7 @@ export default function PortalDashboard() {
                 className="object-cover opacity-60"
                 priority
               />
-              <div className="absolute inset-0 bg-linear-to-t from-[#06040d] via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-[#110e20] via-transparent to-transparent" />
 
               <div className="absolute inset-0 flex flex-col justify-end p-16 md:p-24">
                 <motion.div

@@ -207,10 +207,10 @@ function GestorContent() {
       <div className="flex flex-col md:flex-row items-center justify-between gap-10">
         <div className="flex items-center gap-8">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-linear-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-3xl font-bold text-white border-4 border-[#06040d] shadow-2xl relative z-10">
+            <div className="w-24 h-24 rounded-full bg-linear-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-3xl font-bold text-white border-4 border-[#110e20] shadow-2xl relative z-10">
               {manager?.name?.split(' ').map(n => n[0]).join('') || "..."}
             </div>
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-4 border-[#06040d] rounded-full z-20 shadow-lg" />
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-4 border-[#110e20] rounded-full z-20 shadow-lg" />
           </div>
           <div>
             <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 mb-2">

@@ -283,7 +283,7 @@ export default function PerfilPage() {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowDeleteModal(false)}
-              className="absolute inset-0 bg-[#06040d]/90 backdrop-blur-xl"
+              className="absolute inset-0 bg-[#110e20]/90 backdrop-blur-xl"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}

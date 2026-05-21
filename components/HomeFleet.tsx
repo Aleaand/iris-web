@@ -5,7 +5,7 @@ import { Ship, Sparkles, Navigation, Shield, Compass, Heart, Wind, Tv, Bed, Drop
 
 export default function HomeFleet() {
   return (
-    <section className="relative w-full bg-[#06040d] pt-32 pb-40 px-6 border-t border-white/5 overflow-hidden z-30">
+    <section className="relative w-full bg-[#110e20] pt-32 pb-40 px-6 border-t border-white/5 overflow-hidden z-30">
       <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-purple-900/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/3 right-1/4 w-[600px] h-[600px] bg-indigo-900/10 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:40px_40px] opacity-30 pointer-events-none" />
@@ -41,7 +41,7 @@ export default function HomeFleet() {
                   alt="Naves Estelares Celestia"
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#06040d] via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#110e20] via-transparent to-transparent" />
 
                 <div className="absolute bottom-6 left-8 flex gap-6 text-[9px] font-mono text-purple-300 tracking-widest uppercase">
                   <div>CAP: 500pax</div>
@@ -94,7 +94,7 @@ export default function HomeFleet() {
                   alt="Runner Pro"
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#06040d] via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#110e20] via-transparent to-transparent" />
                 <div className="absolute bottom-6 left-8 flex gap-6 text-[9px] font-mono text-indigo-300 tracking-widest uppercase">
                   <div>CAP: 1000 pax</div>
                   <div>VEL: 500,000 km/s</div>
@@ -172,7 +172,7 @@ export default function HomeFleet() {
                     alt="Cabina Nova"
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#06040d] via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#110e20] via-transparent to-transparent" />
                   <div className="absolute top-6 left-6 px-4 py-1.5 bg-purple-500/20 backdrop-blur-md rounded-full border border-purple-500/30 text-[9px] font-mono tracking-widest text-purple-300 uppercase">
                     La más solicitada por nuestros pasajeros
                   </div>
@@ -216,7 +216,7 @@ export default function HomeFleet() {
                     alt="Cabina Supernova Suite"
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#06040d] via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#110e20] via-transparent to-transparent" />
 
                   <div className="absolute top-6 left-6 px-4 py-1.5 bg-indigo-500/20 backdrop-blur-md rounded-full border border-indigo-500/30 text-[9px] font-mono tracking-widest text-indigo-300 uppercase">
                     La más alagada por nuestros pasajeros

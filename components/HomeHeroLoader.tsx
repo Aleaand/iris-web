@@ -11,7 +11,7 @@ export default function HomeHeroLoader({ show, progress, loaded }: HomeHeroLoade
 
   return (
     <div
-      className={`fixed inset-0 z-50 bg-[#06040d] flex flex-col items-center justify-center space-y-6 transition-opacity duration-700 ease-in-out ${loaded ? "opacity-0 pointer-events-none" : "opacity-100"
+      className={`fixed inset-0 z-50 bg-[#110e20] flex flex-col items-center justify-center space-y-6 transition-opacity duration-700 ease-in-out ${loaded ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
     >
       <div className="relative w-24 h-24 flex items-center justify-center">

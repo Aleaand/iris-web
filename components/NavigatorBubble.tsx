@@ -81,10 +81,10 @@ export default function NavigatorBubble() {
             <div className="p-6 bg-linear-to-br from-purple-600/20 to-indigo-600/20 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="w-10 h-10 rounded-full bg-linear-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white border-2 border-[#06040d]">
+                  <div className="w-10 h-10 rounded-full bg-linear-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white border-2 border-[#110e20]">
                     {session ? (manager?.name?.split(' ').map((n: any) => n[0]).join('') || "EV") : <User size={14} />}
                   </div>
-                  {session && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#06040d] rounded-full" />}
+                  {session && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#110e20] rounded-full" />}
                 </div>
                 <div>
                   <h4 className="text-[11px] font-bold text-white uppercase tracking-widest">Asistente Iris</h4>
@@ -173,7 +173,7 @@ export default function NavigatorBubble() {
           <div className="relative">
             <MessageCircle size={28} />
             {session && unreadCount > 0 && (
-              <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 border-2 border-[#06040d] rounded-full flex items-center justify-center text-[10px] font-bold text-white">
+              <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 border-2 border-[#110e20] rounded-full flex items-center justify-center text-[10px] font-bold text-white">
                 {unreadCount}
               </span>
             )}

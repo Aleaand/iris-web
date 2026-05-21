@@ -4,7 +4,6 @@ import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import Navbar from "@/components/Navbar";
-import Starfield from "@/components/Starfield";
 import Link from "next/link";
 import {
   Search, Rocket, Calendar, Users, ChevronRight, Loader2, Sparkles, Shield, Crown,
@@ -478,7 +477,7 @@ function BookingContent() {
     setIsCreating(false);
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#06040d]"><Loader2 className="text-purple-500 animate-spin" size={48} /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#110e20]"><Loader2 className="text-purple-500 animate-spin" size={48} /></div>;
 
   const visibleFlights = (() => {
     if (isSelectingReturn && selection.outboundFlight) {
@@ -1565,7 +1564,7 @@ function BookingContent() {
                                 alt="Cabina Nova"
                                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-[#06040d] via-transparent to-transparent" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-[#110e20] via-transparent to-transparent" />
                               <div className="absolute top-6 left-6 px-4 py-1.5 bg-purple-500/20 backdrop-blur-md rounded-full border border-purple-500/30 text-[9px] font-mono tracking-widest text-purple-300 uppercase">
                                 La más solicitada por nuestros pasajeros
                               </div>
@@ -1607,7 +1606,7 @@ function BookingContent() {
                                 alt="Cabina Supernova Suite"
                                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-[#06040d] via-transparent to-transparent" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-[#110e20] via-transparent to-transparent" />
                               <div className="absolute top-6 left-6 px-4 py-1.5 bg-indigo-500/20 backdrop-blur-md rounded-full border border-indigo-500/30 text-[9px] font-mono tracking-widest text-indigo-300 uppercase">
                                 La más alagada por nuestros pasajeros
                               </div>
@@ -2138,9 +2137,7 @@ function BookingContent() {
 
 export default function BookingPage() {
   return (
-    <main className="min-h-screen bg-[#06040d]">
-      <Starfield />
-      <Navbar />
+    <main className="min-h-screen bg-[#110e20]">      <Navbar />
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="text-purple-500 animate-spin" size={48} /></div>}>
         <BookingContent />
       </Suspense>

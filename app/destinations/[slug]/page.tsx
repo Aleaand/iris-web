@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
-import Starfield from "@/components/Starfield";
 import { getNasaImages } from "@/lib/nasa";
 import { irisApi } from "@/lib/api";
 import { Destination, Flight } from "@/types";
@@ -59,8 +58,7 @@ export default async function DestinationPage({ params }: { params: { slug: stri
   const flights = vuelos;
 
   return (
-    <main className="min-h-screen relative bg-[#06040d]">
-      <Starfield />
+    <main className="min-h-screen relative bg-[#110e20] overflow-x-hidden">
       <Navbar />
 
       {/* Hero Section con Imagen de la NASA de fondo */}
@@ -72,7 +70,7 @@ export default async function DestinationPage({ params }: { params: { slug: stri
           className="object-cover opacity-40 blur-[2px]"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#06040d]/50 to-[#06040d]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#110e20]/50 to-[#110e20]" />
 
         <div className="relative z-10 text-center px-6 animate-fade-in">
           <h1 className="text-8xl md:text-[12rem] font-bold tracking-tighter text-white uppercase leading-none opacity-90">

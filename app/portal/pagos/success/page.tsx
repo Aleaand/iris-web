@@ -123,7 +123,7 @@ function SuccessContent() {
 
 export default function SuccessPage() {
   return (
-    <div className="min-h-screen pt-32 pb-20 px-6 bg-[#06040d] selection:bg-purple-500/30">
+    <div className="min-h-screen pt-32 pb-20 px-6 bg-[#110e20] selection:bg-purple-500/30">
       <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh]"><Rocket className="animate-bounce text-purple-500" /></div>}>
         <SuccessContent />
       </Suspense>

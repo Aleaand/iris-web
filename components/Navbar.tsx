@@ -69,8 +69,7 @@ export default function Navbar() {
   const publicLinks = [
     { label: "Atlas Estelar", href: "/destinations" },
     { label: "Reserva", href: "/booking" },
-    { label: "Entrenamiento", href: "/services/training" },
-    { label: "Pasaporte", href: "/services/passport" },
+    { label: "Servicios Extras", href: "/services" },
     { label: "Legado", href: "/about" },
   ];
 
@@ -244,7 +243,7 @@ export default function Navbar() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed inset-0 z-40 bg-[#06040d]/98 backdrop-blur-3xl flex flex-col items-center justify-center p-8 md:hidden"
+            className="fixed inset-0 z-40 bg-[#110e20]/98 backdrop-blur-3xl flex flex-col items-center justify-center p-8 md:hidden"
           >
             <div className="flex flex-col items-center gap-6 w-full max-w-xs">
               {currentLinks.map((link) => (

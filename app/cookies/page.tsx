@@ -1,12 +1,8 @@
 import React from "react";
 import Navbar from "@/components/Navbar";
-import Starfield from "@/components/Starfield";
-
 export default function CookiesPage() {
   return (
-    <main className="min-h-screen relative bg-[#06040d] text-white pt-40 pb-20 px-6">
-      <Starfield />
-      <Navbar />
+    <main className="min-h-screen relative bg-[#110e20] text-white pt-40 pb-20 px-6">      <Navbar />
       <div className="max-w-4xl mx-auto relative z-10">
         <h1 className="text-4xl md:text-5xl font-bold mb-12 tracking-tight">Política de Cookies Cuánticas</h1>
         

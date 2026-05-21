@@ -31,7 +31,7 @@ export default function HomeInformation() {
   }, []);
 
   return (
-    <section className="relative w-full bg-[#06040d] pb-32 px-6 overflow-hidden border-t border-white/5 z-30">
+    <section className="relative w-full bg-[#110e20] pb-32 px-6 overflow-hidden border-t border-white/5 z-30">
       <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-purple-500/5 blur-[120px] rounded-full pointer-events-none animate-pulse" />
       <div className="absolute top-1/3 right-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none animate-pulse" />
       <div className="max-w-6xl mx-auto relative z-10">
@@ -63,7 +63,7 @@ export default function HomeInformation() {
                   (e.currentTarget as HTMLImageElement).src = DEFAULT_IMAGES.destinos;
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#06040d]/60 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#110e20]/60 to-transparent pointer-events-none" />
             </div>
           </div>
           <div className="relative bg-white/[0.07] backdrop-blur-xl border border-purple-400/10 rounded-3xl shadow-[0_0_50px_-12px_rgba(168,85,247,0.15)] min-h-[460px] flex flex-col justify-between transition-all duration-500 overflow-hidden">
@@ -85,7 +85,7 @@ export default function HomeInformation() {
                   (e.currentTarget as HTMLImageElement).src = DEFAULT_IMAGES.tulado;
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#06040d]/60 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#110e20]/60 to-transparent pointer-events-none" />
             </div>
           </div>
           <div className="relative bg-white/[0.07] backdrop-blur-xl border border-purple-400/10 rounded-3xl shadow-[0_0_50px_-12px_rgba(99,102,241,0.25)] min-h-[460px] flex flex-col justify-between transition-all duration-500 overflow-hidden">
@@ -107,7 +107,7 @@ export default function HomeInformation() {
                   (e.currentTarget as HTMLImageElement).src = DEFAULT_IMAGES.flexibilidad;
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#06040d]/60 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#110e20]/60 to-transparent pointer-events-none" />
             </div>
           </div>
 

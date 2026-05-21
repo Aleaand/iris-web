@@ -3,7 +3,6 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import Starfield from "@/components/Starfield";
 import { Lock, AlertCircle, Rocket, CheckCircle2, Key, Eye, EyeOff } from "lucide-react";
 import { irisApi } from "@/lib/api";
 
@@ -154,9 +153,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <main className="min-h-screen relative overflow-hidden bg-[#06040d] flex items-center justify-center px-6">
-      <Starfield />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 aurora-blur rounded-full pointer-events-none" />
+    <main className="min-h-screen relative overflow-hidden bg-[#110e20] flex items-center justify-center px-6">      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 aurora-blur rounded-full pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-md">
         <div className="flex flex-col items-center mb-10 text-center">

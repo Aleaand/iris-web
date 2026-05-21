@@ -729,7 +729,7 @@ export default function HomeDestination() {
 
       <div className="absolute inset-0 bg-radial-gradient(circle, transparent 30%, rgba(0,0,0,0.5) 100%) pointer-events-none z-10" />
 
-      <div className="relative w-full text-center px-6 z-20 pointer-events-none">
+      <div className="relative w-full text-center px-6 z-20 pointer-events-none mt-20">
         <div className="max-w-4xl mx-auto space-y-4">
           <div
             ref={mainTitleRef}

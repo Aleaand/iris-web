@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import Starfield from "@/components/Starfield";
 import { User, Mail, Lock, AlertCircle, Rocket, CheckCircle2, Eye, EyeOff, Calendar, Phone } from "lucide-react";
 import { irisApi } from "@/lib/api";
 
@@ -65,9 +64,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen relative overflow-hidden bg-[#06040d] flex items-center justify-center px-6 py-20">
-      <Starfield />
-      <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-indigo-600/10 aurora-blur rounded-full pointer-events-none" />
+    <main className="min-h-screen relative overflow-hidden bg-[#110e20] flex items-center justify-center px-6 py-20">      <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-indigo-600/10 aurora-blur rounded-full pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-xl">
         {/* Logo */}

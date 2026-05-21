@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
-import Starfield from "@/components/Starfield";
 import HomeHeroLoader from "@/components/HomeHeroLoader";
 import HomeHeroNarrative from "@/components/HomeHeroNarrative";
 import HomeHeroScrollPrompt from "@/components/HomeHeroScrollPrompt";
@@ -399,7 +398,7 @@ export default function Home() {
   };
 
   return (
-    <main className="relative w-full h-auto bg-[#06040d] text-white select-none">
+    <main className="relative w-full h-auto bg-[#110e20] text-white select-none">
       <section ref={containerRef} className="relative w-full h-[220vh]">
         <HomeHeroLoader show={showLoader} progress={loadProgress} loaded={imagesLoaded} />
         <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col items-center justify-center">
@@ -412,8 +411,8 @@ export default function Home() {
             <Navbar />
           </div>
 
-          <div className="absolute inset-0 z-10 bg-gradient-to-b from-[#06040d]/80 via-transparent to-[#06040d] pointer-events-none" />
-          <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#06040d]/40 via-transparent to-[#06040d]/40 pointer-events-none" />
+          <div className="absolute inset-0 z-10 bg-gradient-to-b from-[#110e20]/80 via-transparent to-[#110e20] pointer-events-none" />
+          <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#110e20]/40 via-transparent to-[#110e20]/40 pointer-events-none" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140vw] h-[140vw] bg-linear-to-tr from-purple-900/10 via-transparent to-transparent opacity-20 blur-[120px] animate-slow-spin z-10 pointer-events-none" />
 
           <HomeHeroNarrative
