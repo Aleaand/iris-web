@@ -1,4 +1,4 @@
-const URL_BASE_API = process.env.NEXT_PUBLIC_API_URL;
+const URL_BASE_API = typeof window !== 'undefined' ? '/api/v1' : process.env.NEXT_PUBLIC_API_URL;
 const CONTROL_IRIS_URL = process.env.NEXT_PUBLIC_CONTROL_IRIS_URL;
 
 export async function apiFetch(

@@ -237,47 +237,85 @@ export default function Navbar() {
         </AnimatePresence>,
         document.body
       )}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed inset-0 z-40 bg-[#110e20]/98 backdrop-blur-3xl flex flex-col items-center justify-center p-8 md:hidden"
-          >
-            <div className="flex flex-col items-center gap-6 w-full max-w-xs">
-              {currentLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between w-full px-6 py-4 rounded-2xl bg-white/5 border border-white/5 text-white/80 hover:text-white transition-all group"
-                >
-                  <span className="text-sm uppercase tracking-[0.2em]">{link.label}</span>
-                  <ChevronRight size={14} className="opacity-20 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                </Link>
-              ))}
-
-              <Link
-                href={isLoggedIn ? "/portal" : "/auth/login"}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="mt-10 w-full py-4 bg-purple-600 text-white rounded-full font-bold uppercase tracking-[0.3em] text-[10px] text-center shadow-2xl shadow-purple-600/20"
-              >
-                {isLoggedIn ? "Ir al Portal" : "Iniciar Sesión"}
-              </Link>
-
-              {isLoggedIn && (
+      {typeof window !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed inset-0 z-[99] bg-[#110e20]/98 backdrop-blur-3xl flex flex-col items-center justify-center p-8 md:hidden"
+            >
+              {/* Header superior dentro del menú móvil */}
+              <div className="absolute top-8 left-8 right-8 flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <Image
+                    src="/img/logo_iris.png"
+                    alt="Iris Logo"
+                    width={28}
+                    height={28}
+                    className="object-contain"
+                  />
+                  <span className="text-white font-bold tracking-[0.2em] text-[10px] uppercase">Iris</span>
+                </div>
                 <button
-                  onClick={() => setIsLogoutModalOpen(true)}
-                  className="text-red-400 text-[10px] uppercase tracking-widest font-bold"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all active:scale-95"
+                  aria-label="Cerrar menú"
                 >
-                  Cerrar Sesión
+                  <X size={20} />
                 </button>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              </div>
+
+              <div className="flex flex-col items-center gap-6 w-full max-w-xs mt-12">
+                {currentLinks.map((link) => {
+                  const isActive = pathname === link.href;
+                  return (
+                    <Link
+                      key={link.label}
+                      href={link.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center justify-between w-full px-6 py-4 rounded-2xl border transition-all duration-300 group ${isActive
+                          ? (menuMode === 'private' ? "bg-purple-600/20 border-purple-500/30 text-purple-400" : "bg-white/10 border-white/10 text-white")
+                          : (menuMode === 'private'
+                            ? "bg-white/5 border-white/5 text-white/80 hover:text-purple-400 hover:bg-purple-600/10 hover:border-purple-500/20"
+                            : "bg-white/5 border-white/5 text-white/80 hover:text-white hover:bg-white/10")
+                        }`}
+                    >
+                      <span className="text-sm uppercase tracking-[0.2em] font-medium">{link.label}</span>
+                      <ChevronRight size={14} className={`transition-all duration-300 ${isActive ? "opacity-100 translate-x-1" : "opacity-20 group-hover:opacity-100 group-hover:translate-x-1"}`} />
+                    </Link>
+                  );
+                })}
+
+                {(!isLoggedIn || menuMode !== 'private') && (
+                  <Link
+                    href={isLoggedIn ? "/portal" : "/auth/login"}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="mt-10 w-full py-4 bg-purple-600 hover:bg-purple-500 text-white rounded-full font-bold uppercase tracking-[0.3em] text-[10px] text-center shadow-2xl shadow-purple-600/20 transition-all duration-300 active:scale-[0.98]"
+                  >
+                    {isLoggedIn ? "Ir al Portal" : "Iniciar Sesión"}
+                  </Link>
+                )}
+
+                {isLoggedIn && (
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setIsLogoutModalOpen(true);
+                    }}
+                    className={`text-red-400 text-[10px] uppercase tracking-widest font-bold hover:text-red-300 transition-colors ${menuMode === 'private' ? 'mt-6' : 'mt-4'
+                      }`}
+                  >
+                    Cerrar Sesión
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }

@@ -113,12 +113,21 @@ export default function PasajerosPage() {
     setProcessing(true);
     const token = (session!.user as any).accessToken;
     try {
+      const datosLimpios = { ...formData };
+      if (!datosLimpios.secondarylastname) delete (datosLimpios as any).secondarylastname;
+      if (!datosLimpios.blood_type) delete (datosLimpios as any).blood_type;
+      if (!datosLimpios.allergies) delete (datosLimpios as any).allergies;
+      if (!datosLimpios.iris_passport_number) delete (datosLimpios as any).iris_passport_number;
+
+      if (!datosLimpios.iris_passport_expiration) (datosLimpios as any).iris_passport_expiration = null;
+      if (!datosLimpios.training_certificate_date) (datosLimpios as any).training_certificate_date = null;
+
       if (editingId) {
-        const response = await irisApi.updatePassenger(token, editingId, formData);
+        const response = await irisApi.updatePassenger(token, editingId, datosLimpios);
         setPassengers(passengers.map(p => p.id === editingId ? (response.datos || response) : p));
         setEditingId(null);
       } else {
-        const response = await irisApi.createPassenger(token, formData);
+        const response = await irisApi.createPassenger(token, datosLimpios);
         setPassengers([...passengers, response.pasajero || response.datos || response]);
         setShowForm(false);
       }

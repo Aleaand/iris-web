@@ -1509,22 +1509,18 @@ function BookingContent() {
                                 setSavingPassenger(i);
                                 try {
                                   const mapped = {
-                                    nombre: p.name,
-                                    apellido1: p.primarylastname,
-                                    apellido2: p.secondarylastname || "",
-                                    dni: p.document_number,
-                                    pais: p.document_country || "ESP",
-                                    fecha_nacimiento: p.birth_date,
-                                    tipo_sangre: p.blood_type,
-                                    alergias: p.allergies || "Ninguna",
-                                    aptitud_fisica: "No apto",
-                                    numero_pasaporte_iris: p.iris_passport_number || "",
-                                    expiracion_pasaporte_iris: p.iris_passport_expiration || null,
-                                    fecha_certificado_training: p.training_certificate_date || null,
-                                    estado_certificado_training: p.training_certificate_status || "none",
-                                    foto_pasaporte: p.passport_photo || "",
-                                    estado_pasaporte: p.passport_status || "none",
-                                    pdf_pasaporte: p.passport_pdf || ""
+                                    name: p.name,
+                                    primarylastname: p.primarylastname,
+                                    secondarylastname: p.secondarylastname || undefined,
+                                    document_number: p.document_number,
+                                    document_country: p.document_country || "ESP",
+                                    birth_date: p.birth_date,
+                                    blood_type: p.blood_type || undefined,
+                                    allergies: p.allergies || undefined,
+                                    physical_fitness: "No apto",
+                                    iris_passport_number: p.iris_passport_number || undefined,
+                                    iris_passport_expiration: p.iris_passport_expiration || null,
+                                    training_certificate_date: p.training_certificate_date || null
                                   };
                                   await irisApi.createPassenger((session?.user as any).accessToken, mapped);
                                   const pRes = await irisApi.getPassengers((session?.user as any).accessToken);
