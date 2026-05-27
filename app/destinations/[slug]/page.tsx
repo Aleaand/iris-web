@@ -6,6 +6,7 @@ import { Destination, Flight } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Rocket, Camera } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 
 export async function generateMetadata(
   { params }: { params: { slug: string } }
@@ -144,7 +145,7 @@ export default async function DestinationPage({ params }: { params: { slug: stri
                     <div key={vuelo.id} className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-500/30 transition-all">
                       <div className="flex justify-between items-start mb-2">
                         <span className="mono-text text-[8px] text-purple-400 font-bold uppercase">{vuelo.code}</span>
-                        <span className="text-white font-bold text-sm">€{vuelo.base_price.toLocaleString()}</span>
+                        <span className="text-white font-bold text-sm">€{formatPrice(vuelo.base_price)}</span>
                       </div>
                       <p className="text-white text-xs font-medium">{new Date(vuelo.departure_date).toLocaleDateString()}</p>
                       <p className="text-slate-500 text-[10px]">{vuelo.ship_name || "Starship"}</p>

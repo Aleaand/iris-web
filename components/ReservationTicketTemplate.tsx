@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import { ArrowLeft, Printer, Rocket, MapPin, Calendar, User, ShieldCheck, QrCode, AlertTriangle, Building, Plane, Shield } from 'lucide-react';
+import { formatPrice } from '@/lib/utils';
 
 interface ReservationTicketTemplateProps {
   reservation: any;
@@ -389,7 +390,7 @@ export default function ReservationTicketTemplate({
                     return activeItems.map((item, idx) => (
                       <div key={idx} className="flex justify-between text-[10px] items-center">
                         <span className="text-slate-500 font-medium">{item.label}</span>
-                        <span className="font-bold text-slate-700">{Number(item.value).toLocaleString('es-ES')} €</span>
+                        <span className="font-bold text-slate-700">{formatPrice(Number(item.value))} €</span>
                       </div>
                     ));
                   }
@@ -398,7 +399,7 @@ export default function ReservationTicketTemplate({
                   return (
                     <div className="flex justify-between text-[10px] items-center">
                       <span className="text-slate-500 font-medium">Servicios Iris</span>
-                      <span className="font-bold text-slate-700">{activePrice.toLocaleString('es-ES')} €</span>
+                      <span className="font-bold text-slate-700">{formatPrice(activePrice)} €</span>
                     </div>
                   );
                 })()}
@@ -406,7 +407,7 @@ export default function ReservationTicketTemplate({
               <div className="pt-4 border-t border-slate-100 flex justify-between items-end">
                 <div className="text-[9px] font-black text-slate-400 uppercase">Total</div>
                 <div className="text-md font-black text-purple-600 font-mono">
-                  {activePrice.toLocaleString('es-ES')} €
+                  {formatPrice(activePrice)} €
                 </div>
               </div>
             </div>

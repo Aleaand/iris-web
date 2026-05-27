@@ -14,6 +14,7 @@ import {
 import { irisApi } from "@/lib/api";
 import { Destination, Flight, Hotel as HotelType, Passenger } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatPrice } from "@/lib/utils";
 
 const getDuration = (start: string, end: string) => {
   const d1 = new Date(start);
@@ -705,7 +706,7 @@ function BookingContent() {
                         <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-2">
                           <div className="flex justify-between items-center">
                             <span className="text-[10px] text-white font-bold">{selection.outboundFlight.code}</span>
-                            <span className="text-[10px] text-purple-400 font-bold">{(selection.outboundFlight.base_price * (form.seat_type === 'Supernova' ? 2.5 : 1)).toLocaleString()}€</span>
+                            <span className="text-[10px] text-purple-400 font-bold">{formatPrice(selection.outboundFlight.base_price * (form.seat_type === 'Supernova' ? 2.5 : 1))}€</span>
                           </div>
                           <p className="text-[9px] text-slate-500 uppercase font-black">{selection.outboundFlight.destination_name || selection.outboundFlight.destination?.name}</p>
                         </div>
@@ -720,7 +721,7 @@ function BookingContent() {
                           <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-2">
                             <div className="flex justify-between items-center">
                               <span className="text-[10px] text-white font-bold">{selection.returnFlight.code}</span>
-                              <span className="text-[10px] text-blue-400 font-bold">{(selection.returnFlight.base_price * (form.seat_type === 'Supernova' ? 2.5 : 1)).toLocaleString()}€</span>
+                              <span className="text-[10px] text-blue-400 font-bold">{formatPrice(selection.returnFlight.base_price * (form.seat_type === 'Supernova' ? 2.5 : 1))}€</span>
                             </div>
                             <p className="text-[9px] text-slate-500 uppercase font-black">{selection.returnFlight.destination_name || selection.returnFlight.destination?.name}</p>
                           </div>
@@ -764,7 +765,7 @@ function BookingContent() {
                             <div className="flex items-center gap-2">
                               <Hotel size={12} className="text-amber-400" />
                               <span className="text-[9px] text-white font-bold truncate max-w-[100px]">{selection.hotel.name}</span>
-                              <span className="text-[10px] text-amber-400 font-bold">{(selection.hotel.price_per_night * getNights() * selection.assignedHotelPassengers.length).toLocaleString()}€</span>
+                              <span className="text-[10px] text-amber-400 font-bold">{formatPrice(selection.hotel.price_per_night * getNights() * selection.assignedHotelPassengers.length)}€</span>
                             </div>
                           </div>
                         )}
@@ -773,7 +774,7 @@ function BookingContent() {
                             <div className="flex items-center gap-2">
                               <Rocket size={12} className="text-green-400 rotate-90" />
                               <span className="text-[9px] text-white font-bold truncate max-w-[100px]">{selection.transfer.name}</span>
-                              <span className="text-[10px] text-green-400 font-bold">{(selection.transfer.price * selection.assignedTransferPassengers.length).toLocaleString()}€</span>
+                              <span className="text-[10px] text-green-400 font-bold">{formatPrice(selection.transfer.price * selection.assignedTransferPassengers.length)}€</span>
                             </div>
                           </div>
                         )}
@@ -787,7 +788,7 @@ function BookingContent() {
                     <p className="text-[8px] text-slate-500 uppercase font-black tracking-[0.2em]">Coste Total</p>
                     <div className="px-2 py-1 rounded bg-purple-600/20 text-[7px] font-black text-purple-400 uppercase tracking-widest border border-purple-500/20">Final</div>
                   </div>
-                  <p className="text-4xl font-black text-white tracking-tighter">{getTotal().toLocaleString()}€</p>
+                  <p className="text-4xl font-black text-white tracking-tighter">{formatPrice(getTotal())}€</p>
                   <p className="text-[8px] text-slate-500 mt-2 font-medium italic">Tasas de lanzamiento e IVA incluidos</p>
                 </div>
 
@@ -955,7 +956,7 @@ function BookingContent() {
                                   <span className="text-[9px] text-slate-500 uppercase font-bold">Por explorador</span>
                                 </div>
                               </div>
-                              <p className="text-2xl font-bold text-white tracking-tight">{(tariffs.passport_management || 2500).toLocaleString()}€</p>
+                              <p className="text-2xl font-bold text-white tracking-tight">{formatPrice(tariffs.passport_management || 2500)}€</p>
                             </div>
 
                             <div className="p-5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.04] transition-all border border-white/10 flex justify-between items-center group/price">
@@ -968,7 +969,7 @@ function BookingContent() {
                                   <span className="text-[9px] text-slate-500 uppercase font-bold">Protocolo Completo</span>
                                 </div>
                               </div>
-                              <p className="text-2xl font-bold text-white tracking-tight">{(tariffs.training || 50000).toLocaleString()}€</p>
+                              <p className="text-2xl font-bold text-white tracking-tight">{formatPrice(tariffs.training || 50000)}€</p>
                             </div>
                           </div>
 
@@ -1169,41 +1170,42 @@ function BookingContent() {
                                       </span>
                                     )}
                                   </div>
-                                <h3 className="text-4xl font-bold text-white tracking-tighter">{v.destination_name || v.destination?.name || 'Destino Desconocido'}</h3>
+                                  <h3 className="text-4xl font-bold text-white tracking-tighter">{v.destination_name || v.destination?.name || 'Destino Desconocido'}</h3>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Precio Base</p>
+                                  <p className="text-3xl font-black text-white">{formatPrice(v.base_price)}€</p>
+                                </div>
                               </div>
-                              <div className="text-right">
-                                <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Precio Base</p>
-                                <p className="text-3xl font-black text-white">{v.base_price.toLocaleString()}€</p>
-                              </div>
-                            </div>
 
-                            <div className="grid grid-cols-3 gap-4 p-4 rounded-2xl bg-black/40 border border-white/5">
-                              <div className="space-y-1">
-                                <p className="text-[8px] text-slate-500 uppercase font-bold">Lanzamiento</p>
-                                <div className="flex items-center gap-2 text-white font-bold text-xs">
-                                  <Calendar size={12} className="text-purple-500" />
-                                  {new Date(v.departure_date).toLocaleDateString()}
+                              <div className="grid grid-cols-3 gap-4 p-4 rounded-2xl bg-black/40 border border-white/5">
+                                <div className="space-y-1">
+                                  <p className="text-[8px] text-slate-500 uppercase font-bold">Lanzamiento</p>
+                                  <div className="flex items-center gap-2 text-white font-bold text-xs">
+                                    <Calendar size={12} className="text-purple-500" />
+                                    {new Date(v.departure_date).toLocaleDateString()}
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="space-y-1">
-                                <p className="text-[8px] text-slate-500 uppercase font-bold">Duración</p>
-                                <div className="flex items-center gap-2 text-white font-bold text-xs">
-                                  <Timer size={12} className="text-purple-500" />
-                                  {getDuration(v.departure_date, v.arrival_date)}
+                                <div className="space-y-1">
+                                  <p className="text-[8px] text-slate-500 uppercase font-bold">Duración</p>
+                                  <div className="flex items-center gap-2 text-white font-bold text-xs">
+                                    <Timer size={12} className="text-purple-500" />
+                                    {getDuration(v.departure_date, v.arrival_date)}
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="space-y-1 text-right">
-                                <p className="text-[8px] text-slate-500 uppercase font-bold">Nave</p>
-                                <div className="flex items-center justify-end gap-2 text-white font-bold text-xs italic">
-                                  <Rocket size={12} className="text-purple-500" />
-                                  {v.starship_name || v.ship_name || 'Iris Vanguard'}
+                                <div className="space-y-1 text-right">
+                                  <p className="text-[8px] text-slate-500 uppercase font-bold">Nave</p>
+                                  <div className="flex items-center justify-end gap-2 text-white font-bold text-xs italic">
+                                    <Rocket size={12} className="text-purple-500" />
+                                    {v.starship_name || v.ship_name || 'Iris Vanguard'}
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-purple-600/10 blur-[60px] rounded-full group-hover:bg-purple-600/20 transition-all duration-700" />
-                        </motion.div>
-                      )})}
+                            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-purple-600/10 blur-[60px] rounded-full group-hover:bg-purple-600/20 transition-all duration-700" />
+                          </motion.div>
+                        )
+                      })}
                     </div>
 
                     {visibleFlights.length === 0 && !searching && hasSearched && (
@@ -1553,7 +1555,7 @@ function BookingContent() {
                                 className={`p-6 rounded-[2.5rem] border transition-all duration-500 flex flex-col justify-between h-44 relative ${p.training_mode === 'request' ? 'border-white bg-white/[0.06] shadow-lg' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
                               >
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 ${p.training_mode === 'request' ? 'bg-white text-black shadow-md font-bold' : 'bg-white/5 text-slate-500'}`}><Zap size={20} /></div>
-                                <div><h4 className="text-white font-bold text-sm mb-1">Iris Training</h4><p className="text-[9px] text-slate-500 uppercase font-black">{(tariffs.training || 50000).toLocaleString()}€</p></div>
+                                <div><h4 className="text-white font-bold text-sm mb-1">Iris Training</h4><p className="text-[9px] text-slate-500 uppercase font-black">{formatPrice(tariffs.training || 50000)}€</p></div>
                                 {p.training_mode === 'request' && <div className="absolute top-4 right-4 text-white"><CheckCircle2 size={16} /></div>}
                               </button>
 
@@ -1562,7 +1564,7 @@ function BookingContent() {
                                 className={`p-6 rounded-[2.5rem] border transition-all duration-500 flex flex-col justify-between h-44 relative ${p.passport_mode === 'request' ? 'border-white bg-white/[0.06] shadow-lg' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
                               >
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 ${p.passport_mode === 'request' ? 'bg-white text-black shadow-md font-bold' : 'bg-white/5 text-slate-500'}`}><ShieldCheck size={20} /></div>
-                                <div><h4 className="text-white font-bold text-sm mb-1">Pasaporte Estelar</h4><p className="text-[9px] text-slate-500 uppercase font-black">{(tariffs.passport_management || 2500).toLocaleString()}€</p></div>
+                                <div><h4 className="text-white font-bold text-sm mb-1">Pasaporte Estelar</h4><p className="text-[9px] text-slate-500 uppercase font-black">{formatPrice(tariffs.passport_management || 2500)}€</p></div>
                                 {p.passport_mode === 'request' && <div className="absolute top-4 right-4 text-white"><CheckCircle2 size={16} /></div>}
                               </button>
                             </div>
@@ -1658,18 +1660,18 @@ function BookingContent() {
                             <div className="space-y-4">
                               <h4 className="text-xs font-black text-white uppercase tracking-widest">Información</h4>
                               <div className="space-y-2">
-                                {bookingMode === 'mission' && <div className="flex justify-between text-[10px] text-slate-400"><span>Vuelo Base ({form.seat_type})</span><span className="text-white">{((selection.outboundFlight?.base_price || 0) * (form.seat_type === 'Supernova' ? 2.5 : 1)).toLocaleString()}€</span></div>}
-                                {p.training_mode === 'request' && <div className="flex justify-between text-[10px] text-slate-400 font-bold"><span>Iris Training</span><span>{(tariffs.training || 50000).toLocaleString()}€</span></div>}
-                                {p.passport_mode === 'request' && <div className="flex justify-between text-[10px] text-slate-400 font-bold"><span>Pasaporte Estelar</span><span>{(tariffs.passport_management || 2500).toLocaleString()}€</span></div>}
+                                {bookingMode === 'mission' && <div className="flex justify-between text-[10px] text-slate-400"><span>Vuelo Base ({form.seat_type})</span><span className="text-white">{formatPrice((selection.outboundFlight?.base_price || 0) * (form.seat_type === 'Supernova' ? 2.5 : 1))}€</span></div>}
+                                {p.training_mode === 'request' && <div className="flex justify-between text-[10px] text-slate-400 font-bold"><span>Iris Training</span><span>{formatPrice(tariffs.training || 50000)}€</span></div>}
+                                {p.passport_mode === 'request' && <div className="flex justify-between text-[10px] text-slate-400 font-bold"><span>Pasaporte Estelar</span><span>{formatPrice(tariffs.passport_management || 2500)}€</span></div>}
                               </div>
                             </div>
                             <div className="pt-6 border-t border-white/10 flex justify-between items-end">
                               <span className="text-[9px] text-slate-500 uppercase font-black">Total Explorador</span>
-                              <span className="text-2xl font-black text-white">{(
+                              <span className="text-2xl font-black text-white">{formatPrice(
                                 (bookingMode === 'mission' ? (selection.outboundFlight?.base_price || 0) * (form.seat_type === 'Supernova' ? 2.5 : 1) : 0) +
                                 (p.training_mode === 'request' ? (tariffs.training || 50000) : 0) +
                                 (p.passport_mode === 'request' ? (tariffs.passport_management || 2500) : 0)
-                              ).toLocaleString()}€</span>
+                              )}€</span>
                             </div>
                           </div>
                         </div>
@@ -2184,7 +2186,7 @@ function BookingContent() {
                                 <div className="w-8 h-8 rounded-full bg-purple-600/20 flex items-center justify-center text-[10px] font-black text-purple-400">{idx + 1}</div>
                                 <p className="text-lg font-bold text-white">{p.name || `Explorador ${idx + 1}`} <span className="text-[10px] text-slate-500 font-normal ml-2">({p.seat_type})</span></p>
                               </div>
-                              <p className="text-lg font-bold text-white">{((baseOutbound + baseReturn) * (1 - discount)).toLocaleString()}€</p>
+                              <p className="text-lg font-bold text-white">{formatPrice((baseOutbound + baseReturn) * (1 - discount))}€</p>
                             </div>
 
                             <div className="pl-11 space-y-2">
@@ -2192,12 +2194,12 @@ function BookingContent() {
                                 <>
                                   <div className="flex justify-between text-[10px] text-slate-400">
                                     <span>Vuelo de Salida ({selection.outboundFlight?.origin_name} → {selection.outboundFlight?.destination_name})</span>
-                                    <span>{baseOutbound.toLocaleString()}€</span>
+                                    <span>{formatPrice(baseOutbound)}€</span>
                                   </div>
                                   {selection.returnFlight && (
                                     <div className="flex justify-between text-[10px] text-slate-400">
                                       <span>Vuelo de Regreso ({selection.returnFlight.origin_name} → {selection.returnFlight.destination_name})</span>
-                                      <span>{baseReturn.toLocaleString()}€</span>
+                                      <span>{formatPrice(baseReturn)}€</span>
                                     </div>
                                   )}
                                 </>
@@ -2205,19 +2207,19 @@ function BookingContent() {
                               {discount > 0 && (
                                 <div className="flex justify-between text-[10px] text-green-400 font-bold italic">
                                   <span>Descuento por Antigüedad (Fidelidad 10%)</span>
-                                  <span>{discountAmount.toLocaleString()}€</span>
+                                  <span>{formatPrice(discountAmount)}€</span>
                                 </div>
                               )}
                               {p.training_mode === 'request' && (
                                 <div className="flex justify-between text-[10px] text-purple-400">
                                   <span>Gestión Iris Training</span>
-                                  <span>{(tariffs.training || 50000).toLocaleString()}€</span>
+                                  <span>{formatPrice(tariffs.training || 50000)}€</span>
                                 </div>
                               )}
                               {p.passport_mode === 'request' && (
                                 <div className="flex justify-between text-[10px] text-indigo-400">
                                   <span>Gestión Pasaporte Estelar</span>
-                                  <span>{(tariffs.passport_management || 2500).toLocaleString()}€</span>
+                                  <span>{formatPrice(tariffs.passport_management || 2500)}€</span>
                                 </div>
                               )}
                             </div>
@@ -2237,7 +2239,7 @@ function BookingContent() {
                               <p className="text-sm font-bold text-white">{selection.hotel.name}</p>
                               <p className="text-[10px] text-slate-500">{getNights()} noches • {selection.assignedHotelPassengers.length} pasajeros asignados</p>
                             </div>
-                            <p className="text-lg font-bold text-amber-400">{(selection.hotel.price_per_night * getNights() * selection.assignedHotelPassengers.length).toLocaleString()}€</p>
+                            <p className="text-lg font-bold text-amber-400">{formatPrice(selection.hotel.price_per_night * getNights() * selection.assignedHotelPassengers.length)}€</p>
                           </div>
                         )}
 
@@ -2247,7 +2249,7 @@ function BookingContent() {
                               <p className="text-sm font-bold text-white">{selection.transfer.name}</p>
                               <p className="text-[10px] text-slate-500">{selection.assignedTransferPassengers.length} pasajeros asignados</p>
                             </div>
-                            <p className="text-lg font-bold text-green-400">{(selection.transfer.price * selection.assignedTransferPassengers.length).toLocaleString()}€</p>
+                            <p className="text-lg font-bold text-green-400">{formatPrice(selection.transfer.price * selection.assignedTransferPassengers.length)}€</p>
                           </div>
                         )}
 
@@ -2257,7 +2259,7 @@ function BookingContent() {
                               <p className="text-sm font-bold text-white">Vuelos Terrestres (Conexión Base)</p>
                               <p className="text-[10px] text-slate-500">{selection.passengerData.length} pasajeros asignados</p>
                             </div>
-                            <p className="text-lg font-bold text-blue-400">{(1500 * selection.passengerData.length).toLocaleString()}€</p>
+                            <p className="text-lg font-bold text-blue-400">{formatPrice(1500 * selection.passengerData.length)}€</p>
                           </div>
                         )}
                       </div>
@@ -2268,7 +2270,7 @@ function BookingContent() {
                   <div className="p-12 bg-white/[0.03] border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-8">
                     <div>
                       <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2">Total Facturado</p>
-                      <p className="text-6xl font-black text-white tracking-tighter">{getTotal().toLocaleString()}€</p>
+                      <p className="text-6xl font-black text-white tracking-tighter">{formatPrice(getTotal())}€</p>
                     </div>
                     <div className="flex gap-4">
                       <button onClick={prevStep} className="px-8 py-3.5 text-slate-500 uppercase font-black text-[10px] tracking-widest hover:text-white transition-colors duration-300">Volver</button>

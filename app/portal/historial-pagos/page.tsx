@@ -5,6 +5,8 @@ import { CreditCard, Download, Loader2, Search, ArrowUpRight, CheckCircle2, Cloc
 import { irisApi } from "@/lib/api";
 import { Payment } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatPrice } from "@/lib/utils";
+import jsPDF from "jspdf";
 
 export default function PagosPage() {
   const { data: session } = useSession();
@@ -69,30 +71,144 @@ export default function PagosPage() {
 
 
   const handleDownloadReport = () => {
-    const headers = ["ID Reserva", "Fecha", "Concepto", "Importe", "Estado", "Transacción"];
-    const rows = filteredPayments.map(p => [
-      `#${p.reservation_id}`,
-      new Date(p.created_at).toLocaleDateString(),
-      p.description,
-      `€${p.amount}`,
-      p.status,
-      p.stripe_payment_id || 'N/A'
-    ]);
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4"
+    });
 
-    const csvContent = [
-      headers.join(","),
-      ...rows.map(e => e.join(","))
-    ].join("\n");
+    doc.setFillColor(15, 10, 30);
+    doc.rect(0, 0, 210, 40, "F");
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Iris_Informe_Financiero_2026_${session?.user?.name?.replace(/\s/g, '_')}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    doc.setFillColor(147, 51, 234);
+    doc.rect(0, 40, 210, 1.5, "F");
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("IRIS AEROSPACE", 15, 20);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(168, 85, 247);
+    doc.text("CENTRO DE OPERACIONES ORBITALES", 15, 26);
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("INFORME FINANCIERO", 195, 20, { align: "right" });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(203, 213, 225);
+    doc.text(`AÑO 2026 • REF: #IR-${Math.floor(100000 + Math.random() * 900000)}`, 195, 26, { align: "right" });
+
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("DETALLES DEL CLIENTE", 15, 55);
+
+    doc.setDrawColor(226, 232, 240);
+    doc.line(15, 57, 195, 57);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(71, 85, 105);
+    doc.text(`Nombre: ${session?.user?.name || "Explorador Iris"}`, 15, 64);
+    doc.text(`Email: ${session?.user?.email || "N/A"}`, 15, 70);
+    doc.text(`ID Cliente: #USR-${String((session?.user as any)?.id || 0).padStart(6, '0')}`, 15, 76);
+
+    doc.text(`Fecha Emisión: ${new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, 195, 64, { align: "right" });
+    doc.text(`Estado General: Activo`, 195, 70, { align: "right" });
+    doc.text(`Puerto de Lanzamiento: Base Cañaveral`, 195, 76, { align: "right" });
+
+    const startY = 88;
+    doc.setFillColor(15, 10, 30);
+    doc.rect(15, startY, 180, 8, "F");
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.text("Fecha", 18, startY + 5.5);
+    doc.text("Concepto / Descripción", 40, startY + 5.5);
+    doc.text("ID Reserva", 108, startY + 5.5);
+    doc.text("Transacción", 132, startY + 5.5);
+    doc.text("Estado", 168, startY + 5.5);
+    doc.text("Importe", 192, startY + 5.5, { align: "right" });
+
+    let currentY = startY + 8;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+
+    filteredPayments.forEach((p, idx) => {
+      if (idx % 2 === 0) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(15, currentY, 180, 8, "F");
+      }
+
+      doc.setDrawColor(241, 245, 249);
+      doc.line(15, currentY + 8, 195, currentY + 8);
+
+      doc.setTextColor(71, 85, 105);
+      doc.text(p.created_at ? new Date(p.created_at).toLocaleDateString('es-ES') : 'Pendiente', 18, currentY + 5);
+      doc.text(p.description || "Reserva Orbital", 40, currentY + 5);
+      doc.text(`#${p.reservation_id}`, 108, currentY + 5);
+
+      const tx = p.stripe_payment_id ? `${p.stripe_payment_id.slice(0, 10)}...` : 'N/A';
+      doc.text(tx, 132, currentY + 5);
+
+      if (p.status === 'Pagado') {
+        doc.setTextColor(16, 185, 129);
+      } else if (p.status === 'Pendiente') {
+        doc.setTextColor(245, 158, 11);
+      } else {
+        doc.setTextColor(148, 163, 184);
+      }
+      doc.text(p.status, 168, currentY + 5);
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${formatPrice(p.amount || 0)} €`, 192, currentY + 5, { align: "right" });
+      doc.setFont("helvetica", "normal");
+
+      currentY += 8;
+    });
+
+    currentY += 6;
+
+    const totalAmount = filteredPayments.reduce((sum, p) => p.status !== 'Reembolsado' ? sum + Number(p.amount || 0) : sum, 0);
+
+    doc.setFillColor(241, 245, 249);
+    doc.rect(125, currentY, 70, 18, "F");
+    doc.setDrawColor(226, 232, 240);
+    doc.rect(125, currentY, 70, 18, "S");
+
+    doc.setTextColor(100, 116, 139);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.text("TOTAL INVERTIDO:", 129, currentY + 6);
+
+    doc.setTextColor(147, 51, 234);
+    doc.setFontSize(14);
+    doc.text(`${formatPrice(totalAmount)} €`, 191, currentY + 12, { align: "right" });
+
+    doc.setTextColor(148, 163, 184);
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(7.5);
+    doc.text("* Excluye importes reembolsados de reservas canceladas.", 15, currentY + 6);
+    doc.text("Este documento sirve como comprobante de transacciones realizadas.", 15, currentY + 11);
+
+    const footerY = 280;
+    doc.setDrawColor(226, 232, 240);
+    doc.line(15, footerY - 5, 195, footerY - 5);
+
+    doc.setTextColor(148, 163, 184);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.text("Iris Aerospace Corporation S.A. • Centro de Control de Cabo Cañaveral • www.irisaerospace.com", 15, footerY);
+    doc.text("Todos los derechos reservados. Copia oficial firmada digitalmente.", 195, footerY, { align: "right" });
+
+    doc.save(`Iris_Informe_Financiero_2026_${session?.user?.name?.replace(/\s/g, '_')}.pdf`);
   };
 
   const totalPages = Math.ceil(filteredPayments.length / itemsPerPage);
@@ -216,7 +332,7 @@ export default function PagosPage() {
                       </td>
                       <td className="px-8 py-6">
                         <span className={`text-white font-bold ${p.status === 'Reembolsado' ? 'line-through opacity-50' : ''}`}>
-                          €{(p.amount || 0).toLocaleString()}
+                          €{formatPrice(p.amount || 0)}
                         </span>
                         {p.status === 'Reembolsado' && (
                           <span className="ml-2 text-[10px] text-slate-500 italic">(Reembolsado)</span>

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { Loader2, ShieldCheck, AlertCircle } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 
 export default function CheckoutForm({ reservationId, amount }: { reservationId: number, amount: number }) {
   const stripe = useStripe();
@@ -37,7 +38,7 @@ export default function CheckoutForm({ reservationId, amount }: { reservationId:
       <div className="flex items-center justify-between mb-4">
         <div>
           <p className="mono-text text-[8px] text-slate-500 uppercase tracking-widest">Total a pagar</p>
-          <p className="text-3xl font-bold text-white">€{amount.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-white">€{formatPrice(amount)}</p>
         </div>
         <div className="w-12 h-12 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400">
           <ShieldCheck size={24} />

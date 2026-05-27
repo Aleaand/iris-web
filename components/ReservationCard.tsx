@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, User, Zap, Shield, Hotel, Ship, Download, Printer } from "lucide-react";
 import ReservationTicketTemplate from "./ReservationTicketTemplate";
 import { createPortal } from "react-dom";
+import { formatPrice } from "@/lib/utils";
 
 export default function ReservationCard({ reservation }: { reservation: any }) {
   const { data: session } = useSession();
@@ -322,7 +323,7 @@ export default function ReservationCard({ reservation }: { reservation: any }) {
           <div className="mb-6 text-center md:text-left">
             <p className="mono-text text-[8px] text-slate-500 uppercase tracking-widest mb-1">Inversión Total</p>
             <div className="flex items-baseline justify-center md:justify-start gap-1">
-              <span className="text-3xl font-bold text-white tracking-tighter">{activePrice.toLocaleString('es-ES')}</span>
+              <span className="text-3xl font-bold text-white tracking-tighter">{formatPrice(activePrice)}</span>
               <span className="text-sm text-purple-400 font-bold">€</span>
             </div>
           </div>
