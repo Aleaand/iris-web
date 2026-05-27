@@ -678,7 +678,7 @@ function BookingContent() {
       <div className={`max-w-[1400px] mx-auto px-6 grid grid-cols-1 ${bookingMode === 'mission' && selection.outboundFlight && step < 6 ? 'lg:grid-cols-4' : 'max-w-4xl'} gap-12 transition-all duration-700 relative z-10`}>
         <AnimatePresence>
           {bookingMode === 'mission' && selection.outboundFlight && step < 6 && (
-            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="hidden lg:block sticky top-32 h-fit space-y-6">
+            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="hidden lg:block sticky top-32 h-fit space-y-6 pb-12">
               <div className="card-purple p-8 rounded-[3rem] border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl relative overflow-hidden group">
                 <div className="absolute inset-0 bg-linear-to-br from-purple-600/5 to-transparent pointer-events-none" />
 
@@ -688,12 +688,20 @@ function BookingContent() {
                 </h3>
 
                 <div className="space-y-8 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar relative z-10">
-                  {/* Warning si la fecha es menor a 5 días */}
+                  {/* Warning si la fecha es menor a 5 días (Colapsable interactivo) */}
                   {selection.outboundFlight && form.departure_date && (new Date(form.departure_date).getTime() - new Date().getTime()) / (1000 * 3600 * 24) < 5 && (
-                    <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-[9px] text-amber-200/90 leading-relaxed font-medium">
-                      <span className="text-amber-400 font-bold uppercase tracking-widest block mb-1">Margen Ajustado</span>
-                      Aviso: Faltan menos de 5 días para la salida. Recuerda que la gestión del Iris Training y Pasaporte requiere un margen mínimo de 5 días de antelación para asegurar su viabilidad antes del lanzamiento.
-                    </div>
+                    <details className="group p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 transition-all duration-300 cursor-pointer select-none [&_summary::-webkit-details-marker]:hidden">
+                      <summary className="flex items-center justify-between text-[9px] text-amber-400 font-bold uppercase tracking-widest outline-none">
+                        <span className="flex items-center gap-2">
+                          <AlertTriangle size={12} className="text-amber-400 animate-pulse shrink-0" />
+                          Margen Ajustado (Aviso)
+                        </span>
+                        <span className="text-[8px] text-slate-500 group-open:rotate-180 transition-transform duration-300">▼</span>
+                      </summary>
+                      <div className="mt-2 text-[9px] text-amber-200/90 leading-relaxed font-medium pt-2 border-t border-amber-500/10 animate-fade-in">
+                        Aviso: Faltan menos de 5 días para la salida. Recuerda que la gestión del Iris Training y Pasaporte requiere un margen mínimo de 5 días de antelación para asegurar su viabilidad antes del lanzamiento.
+                      </div>
+                    </details>
                   )}
 
                   {bookingMode === 'mission' && selection.outboundFlight && (
@@ -705,7 +713,7 @@ function BookingContent() {
                         </div>
                         <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-2">
                           <div className="flex justify-between items-center">
-                            <span className="text-[10px] text-white font-bold">{selection.outboundFlight.code}</span>
+                            <span className="text-[10px] text-white font-bold">{selection.outboundFlight.code || (selection.outboundFlight as any).flight_code}</span>
                             <span className="text-[10px] text-purple-400 font-bold">{formatPrice(selection.outboundFlight.base_price * (form.seat_type === 'Supernova' ? 2.5 : 1))}€</span>
                           </div>
                           <p className="text-[9px] text-slate-500 uppercase font-black">{selection.outboundFlight.destination_name || selection.outboundFlight.destination?.name}</p>
@@ -720,7 +728,7 @@ function BookingContent() {
                           </div>
                           <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-2">
                             <div className="flex justify-between items-center">
-                              <span className="text-[10px] text-white font-bold">{selection.returnFlight.code}</span>
+                              <span className="text-[10px] text-white font-bold">{selection.returnFlight.code || (selection.returnFlight as any).flight_code}</span>
                               <span className="text-[10px] text-blue-400 font-bold">{formatPrice(selection.returnFlight.base_price * (form.seat_type === 'Supernova' ? 2.5 : 1))}€</span>
                             </div>
                             <p className="text-[9px] text-slate-500 uppercase font-black">{selection.returnFlight.destination_name || selection.returnFlight.destination?.name}</p>
@@ -796,19 +804,13 @@ function BookingContent() {
                 <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-purple-600/10 blur-[80px] rounded-full" />
               </div>
 
-              {/* Tips / Help Card */}
-              <div className="p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-md">
-                <p className="text-[9px] text-slate-400 leading-relaxed flex gap-3 italic">
-                  <Info size={14} className="text-purple-400 shrink-0" />
-                  Nuestro equipo de revisará los detalles de tu reserva en las próximas 24 horas.
-                </p>
-              </div>
+
             </motion.div>
           )}
         </AnimatePresence>
 
         <div className={`lg:col-span-3 pb-40 ${bookingMode === 'mission' && !selection.outboundFlight ? 'lg:col-start-1 lg:col-end-5 mx-auto' : ''}`}>
-          <div className="flex justify-center mb-16">
+          <div className="flex justify-center pt-10 mt-6 mb-10">
             <AnimatePresence>
               {((step > 1 && (selection.package === 'altair' || bookingMode === 'services')) || step === 6) && (
                 <motion.div
@@ -1163,7 +1165,7 @@ function BookingContent() {
                               <div className="flex justify-between items-start mb-8">
                                 <div className="space-y-2">
                                   <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-black text-purple-400 uppercase tracking-[0.2em]">{v.code}</span>
+                                    <span className="text-[10px] font-black text-purple-400 uppercase tracking-[0.2em]">{v.code || (v as any).flight_code}</span>
                                     {!isExact && (
                                       <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[7px] font-black uppercase tracking-widest rounded-md flex items-center gap-1">
                                         <Calendar size={8} className="shrink-0" /> Fecha Cercana
@@ -1287,54 +1289,56 @@ function BookingContent() {
                 </div>
 
                 <div className="space-y-6 max-w-5xl mx-auto">
-                  <div className="text-center"><h3 className="text-purple-400 font-black tracking-widest uppercase text-xs">Los Packs de Reserva</h3></div>
+                  <div className="text-center my-6">
+                    <h3 className="text-3xl md:text-4xl font-bold text-purple-400 tracking-tight">Los Packs de Reserva</h3>
+                  </div>
                   <div className="grid md:grid-cols-3 gap-6 relative z-20">
                     <button
                       onClick={() => setSelection({ ...selection, package: 'sirius' })}
-                      className={`p-6 rounded-[2.5rem] border-2 transition-all text-left flex flex-col justify-between ${selection.package === 'sirius' ? 'border-purple-500 bg-purple-600/20' : 'border-white/5 bg-white/5 hover:border-white/10'}`}
+                      className={`p-8 rounded-[2.5rem] border-2 transition-all text-left flex flex-col justify-between ${selection.package === 'sirius' ? 'border-purple-500 bg-purple-600/20' : 'border-white/5 bg-white/5 hover:border-white/10'}`}
                     >
                       <div>
-                        <h4 className="text-xl font-bold text-white mb-2">Sirius</h4>
-                        <p className="text-[11px] text-slate-400 mb-6 leading-relaxed">Lo esencial para brillar en el espacio. El punto de partida para cualquier viajero.</p>
-                        <ul className="space-y-3 mb-6">
-                          <li className="flex items-center gap-2 text-[11px] text-slate-300"><CheckCircle2 size={14} className="text-purple-400" /> Vuelo (Nova)</li>
-                          <li className="flex items-center gap-2 text-[11px] text-slate-300"><CheckCircle2 size={14} className="text-purple-400" /> Iris Training</li>
+                        <h4 className="text-2xl font-bold text-white mb-3">Sirius</h4>
+                        <p className="text-xs md:text-sm text-slate-400 mb-6 leading-relaxed">Lo esencial para brillar en el espacio. El punto de partida para cualquier viajero.</p>
+                        <ul className="space-y-4 mb-6">
+                          <li className="flex items-center gap-2.5 text-xs md:text-sm text-slate-300"><CheckCircle2 size={16} className="text-purple-400" /> Vuelo (Nova)</li>
+                          <li className="flex items-center gap-2.5 text-xs md:text-sm text-slate-300"><CheckCircle2 size={16} className="text-purple-400" /> Iris Training</li>
                         </ul>
                       </div>
-                      <div className="text-[10px] font-black text-purple-400 uppercase tracking-widest mt-4">Seleccionar</div>
+                      <div className="text-xs font-black text-purple-400 uppercase tracking-widest mt-4">Seleccionar</div>
                     </button>
 
                     <button
                       onClick={() => setSelection({ ...selection, package: 'polaris' })}
-                      className={`p-6 rounded-[2.5rem] border-2 transition-all text-left flex flex-col justify-between ${selection.package === 'polaris' ? 'border-blue-500 bg-blue-600/20' : 'border-white/5 bg-white/5 hover:border-white/10'}`}
+                      className={`p-8 rounded-[2.5rem] border-2 transition-all text-left flex flex-col justify-between ${selection.package === 'polaris' ? 'border-blue-500 bg-blue-600/20' : 'border-white/5 bg-white/5 hover:border-white/10'}`}
                     >
                       <div>
-                        <h4 className="text-xl font-bold text-white mb-2">Polaris</h4>
-                        <p className="text-[11px] text-slate-400 mb-6 leading-relaxed">Es la estrella del norte, la que guía a los navegantes. Tu camino sin pérdida.</p>
-                        <ul className="space-y-3 mb-6">
-                          <li className="flex items-center gap-2 text-[11px] text-slate-300"><CheckCircle2 size={14} className="text-blue-400" /> Vuelo (Nova)</li>
-                          <li className="flex items-center gap-2 text-[11px] text-slate-300"><CheckCircle2 size={14} className="text-blue-400" /> Iris Training</li>
-                          <li className="flex items-center gap-2 text-[11px] text-slate-300"><CheckCircle2 size={14} className="text-blue-400" /> Gestión Pasaporte</li>
+                        <h4 className="text-2xl font-bold text-white mb-3">Polaris</h4>
+                        <p className="text-xs md:text-sm text-slate-400 mb-6 leading-relaxed">Es la estrella del norte, la que guía a los navegantes. Tu camino sin pérdida.</p>
+                        <ul className="space-y-4 mb-6">
+                          <li className="flex items-center gap-2.5 text-xs md:text-sm text-slate-300"><CheckCircle2 size={16} className="text-blue-400" /> Vuelo (Nova)</li>
+                          <li className="flex items-center gap-2.5 text-xs md:text-sm text-slate-300"><CheckCircle2 size={16} className="text-blue-400" /> Iris Training</li>
+                          <li className="flex items-center gap-2.5 text-xs md:text-sm text-slate-300"><CheckCircle2 size={16} className="text-blue-400" /> Gestión Pasaporte</li>
                         </ul>
                       </div>
-                      <div className="text-[10px] font-black text-blue-400 uppercase tracking-widest mt-4">Seleccionar</div>
+                      <div className="text-xs font-black text-blue-400 uppercase tracking-widest mt-4">Seleccionar</div>
                     </button>
 
                     <button
                       onClick={() => setSelection({ ...selection, package: 'rigel' })}
-                      className={`p-6 rounded-[2.5rem] border-2 transition-all text-left flex flex-col justify-between relative overflow-hidden ${selection.package === 'rigel' ? 'border-amber-500 bg-amber-600/20 shadow-[0_0_30px_rgba(245,158,11,0.15)]' : 'border-white/5 bg-white/5 hover:border-white/10'}`}
+                      className={`p-8 rounded-[2.5rem] border-2 transition-all text-left flex flex-col justify-between relative overflow-hidden ${selection.package === 'rigel' ? 'border-amber-500 bg-amber-600/20 shadow-[0_0_30px_rgba(245,158,11,0.15)]' : 'border-white/5 bg-white/5 hover:border-white/10'}`}
                     >
                       <div className="relative z-10">
-                        <h4 className="text-xl font-bold text-white mb-2">Rigel</h4>
-                        <p className="text-[11px] text-slate-400 mb-6 leading-relaxed">El poder absoluto. No te preocupas por nada; nosotros movemos el mundo para ti.</p>
-                        <ul className="space-y-3 mb-6">
-                          <li className="flex items-center gap-2 text-[11px] text-slate-300"><Sparkles size={14} className="text-amber-400" /> Vuelo Supernova</li>
-                          <li className="flex items-center gap-2 text-[11px] text-slate-300"><Sparkles size={14} className="text-amber-400" /> Training & Pasaporte</li>
-                          <li className="flex items-center gap-2 text-[11px] text-slate-300"><Sparkles size={14} className="text-amber-400" /> Hotel Premium</li>
-                          <li className="flex items-center gap-2 text-[11px] text-slate-300"><Sparkles size={14} className="text-amber-400" /> Traslados</li>
+                        <h4 className="text-2xl font-bold text-white mb-3">Rigel</h4>
+                        <p className="text-xs md:text-sm text-slate-400 mb-6 leading-relaxed">El poder absoluto. No te preocupas por nada; nosotros movemos el mundo para ti.</p>
+                        <ul className="space-y-4 mb-6">
+                          <li className="flex items-center gap-2.5 text-xs md:text-sm text-slate-300"><Sparkles size={16} className="text-amber-400" /> Vuelo Supernova</li>
+                          <li className="flex items-center gap-2.5 text-xs md:text-sm text-slate-300"><Sparkles size={16} className="text-amber-400" /> Training & Pasaporte</li>
+                          <li className="flex items-center gap-2.5 text-xs md:text-sm text-slate-300"><Sparkles size={16} className="text-amber-400" /> Hotel Premium</li>
+                          <li className="flex items-center gap-2.5 text-xs md:text-sm text-slate-300"><Sparkles size={16} className="text-amber-400" /> Traslados</li>
                         </ul>
                       </div>
-                      <div className="relative z-10 text-[10px] font-black text-amber-400 uppercase tracking-widest mt-4">Seleccionar</div>
+                      <div className="relative z-10 text-xs font-black text-amber-400 uppercase tracking-widest mt-4">Seleccionar</div>
                     </button>
                   </div>
 
@@ -2262,6 +2266,45 @@ function BookingContent() {
                             <p className="text-lg font-bold text-blue-400">{formatPrice(1500 * selection.passengerData.length)}€</p>
                           </div>
                         )}
+                      </div>
+                    )}
+
+                    {selection.addRefundInsurance && (
+                      <div className="space-y-6 pt-12 border-t border-white/5">
+                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-4">Garantías y Seguros</h4>
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-sm font-bold text-white">Seguro de Reembolso Iris</p>
+                            <p className="text-[10px] text-slate-500">
+                              Para más información, puedes <a href="/refund" target="_blank" className="text-purple-400 hover:text-purple-300 underline font-medium cursor-pointer">revisar nuestra política de reembolso</a>.
+                            </p>
+                          </div>
+                          <p className="text-lg font-bold text-indigo-400">
+                            {formatPrice(
+                              (() => {
+                                let subTotal = 0;
+                                selection.passengerData.forEach((p: any) => {
+                                  const multiplier = p.seat_type === 'Supernova' ? 2.5 : 1;
+                                  const discount = getPassengerDiscount(p);
+                                  let flightCost = 0;
+                                  if (bookingMode === 'mission') {
+                                    if (selection.outboundFlight) flightCost += (selection.outboundFlight.base_price || 0) * multiplier;
+                                    if (selection.returnFlight) flightCost += (selection.returnFlight.base_price || 0) * multiplier;
+                                  }
+                                  subTotal += flightCost * (1 - discount);
+                                  if (p.training_mode === 'request') subTotal += (tariffs.training || 50000);
+                                  if (p.passport_mode === 'request') subTotal += (tariffs.passport_management || 2500);
+                                });
+                                if (selection.hotel) subTotal += (selection.hotel.price_per_night || 0) * getNights() * selection.assignedHotelPassengers.length;
+                                if (selection.transfer) subTotal += (selection.transfer.price || 0) * selection.assignedTransferPassengers.length;
+                                if (selection.addVipTransfer) subTotal += (tariffs.vip_transfer || 1000);
+                                if (selection.addAirTransfer) subTotal += (tariffs.air_transfer || 1500) * selection.passengerData.length;
+                                
+                                return subTotal * ((tariffs.refund_insurance_pct || 10) / 100);
+                              })()
+                            )}€
+                          </p>
+                        </div>
                       </div>
                     )}
                   </div>
