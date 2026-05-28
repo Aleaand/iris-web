@@ -26,21 +26,25 @@ export default function ReservationTicketTemplate({
   locator,
   passengers
 }: ReservationTicketTemplateProps) {
+  const isExtraService = 
+    (!reservation.flights || reservation.flights.length === 0) && 
+    !reservation.outbound_flight && 
+    !reservation.space_flight_id;
 
   const mainPassenger = passengers?.[0] || reservation.passenger || reservation.pasajero || {};
   const user = reservation.user || {};
 
-  const resolvedDepartureDate = 
-    departureDate || 
-    activeFlight?.departure_date || 
+  const resolvedDepartureDate =
+    departureDate ||
+    activeFlight?.departure_date ||
     activeFlight?.departureDate ||
     reservation.outbound_flight?.departure_date ||
     reservation.departure_date ||
     null;
 
-  const resolvedArrivalDate = 
-    arrivalDate || 
-    activeFlight?.arrival_date || 
+  const resolvedArrivalDate =
+    arrivalDate ||
+    activeFlight?.arrival_date ||
     activeFlight?.landing_date ||
     activeFlight?.arrivalDate ||
     reservation.outbound_flight?.arrival_date ||
@@ -49,7 +53,7 @@ export default function ReservationTicketTemplate({
     reservation.landing_date ||
     null;
 
-  const resolvedStarshipName = 
+  const resolvedStarshipName =
     starshipName && starshipName !== 'Desconocida' && starshipName !== 'TBD' ? starshipName : (
       reservation.outbound_flight?.starship?.name ||
       reservation.outbound_flight?.starship_name ||
@@ -65,10 +69,10 @@ export default function ReservationTicketTemplate({
       'Iris Vanguard'
     );
 
-  const originPlanet = 
-    reservation.outbound_flight?.origin_name || 
-    reservation.origin_name || 
-    activeFlight?.origin?.name || 
+  const originPlanet =
+    reservation.outbound_flight?.origin_name ||
+    reservation.origin_name ||
+    activeFlight?.origin?.name ||
     activeFlight?.origin_name ||
     activeFlight?.origin ||
     'Tierra';
@@ -124,74 +128,111 @@ export default function ReservationTicketTemplate({
               </div>
             </div>
 
-            <div className="flex items-center justify-between mb-16 px-4">
-              <div className="text-center">
-                <div className="text-5xl font-black tracking-tighter text-slate-900 leading-none uppercase">
-                  {(reservation.outbound_flight?.origin_name || reservation.origin_name || activeFlight?.origin?.name || 'Tierra').substring(0, 3)}
+            {isExtraService ? (
+              <div className="flex flex-col items-center justify-center mb-12 p-8 bg-purple-500/5 rounded-[30px] border border-purple-500/10 text-center">
+                <div className="w-16 h-16 bg-purple-600/10 border border-purple-500/20 rounded-2xl flex items-center justify-center mb-4 text-purple-600">
+                  <ShieldCheck size={32} />
                 </div>
-                <div className="text-[11px] font-bold text-slate-500 uppercase mt-2 tracking-widest">
-                  {reservation.outbound_flight?.origin_name || reservation.origin_name || activeFlight?.origin?.name || 'Cabo Cañaveral'}
-                </div>
+                <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase">Comprobante de Servicios Extras</h2>
+                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Servicios de Soporte y Logística Terrestre/Estelar</p>
               </div>
+            ) : (
+              <div className="flex items-center justify-between mb-16 px-4">
+                <div className="text-center">
+                  <div className="text-5xl font-black tracking-tighter text-slate-900 leading-none uppercase">
+                    {(reservation.outbound_flight?.origin_name || reservation.origin_name || activeFlight?.origin?.name || 'Tierra').substring(0, 3)}
+                  </div>
+                  <div className="text-[11px] font-bold text-slate-500 uppercase mt-2 tracking-widest">
+                    {reservation.outbound_flight?.origin_name || reservation.origin_name || activeFlight?.origin?.name || 'Cabo Cañaveral'}
+                  </div>
+                </div>
 
-              <div className="flex-1 mx-8 relative flex items-center justify-center">
-                <div className="w-full h-px border-t-2 border-dashed border-slate-200"></div>
-                <div className="absolute bg-white p-2 rounded-full text-purple-600 shadow-sm border border-slate-100 rotate-90">
-                  <Rocket size={20} />
+                <div className="flex-1 mx-8 relative flex items-center justify-center">
+                  <div className="w-full h-px border-t-2 border-dashed border-slate-200"></div>
+                  <div className="absolute bg-white p-2 rounded-full text-purple-600 shadow-sm border border-slate-100 rotate-90">
+                    <Rocket size={20} />
+                  </div>
                 </div>
-              </div>
 
-              <div className="text-center">
-                <div className="text-5xl font-black tracking-tighter text-purple-600 leading-none uppercase">
-                  {(reservation.outbound_flight?.destination_name || reservation.destination_name || activeFlight?.destination?.name || 'Destino').substring(0, 3)}
-                </div>
-                <div className="text-[11px] font-bold text-slate-500 uppercase mt-2 tracking-widest">
-                  {reservation.outbound_flight?.destination_name || reservation.destination_name || activeFlight?.destination?.name || 'Destino'}
+                <div className="text-center">
+                  <div className="text-5xl font-black tracking-tighter text-purple-600 leading-none uppercase">
+                    {(reservation.outbound_flight?.destination_name || reservation.destination_name || activeFlight?.destination?.name || 'Destino').substring(0, 3)}
+                  </div>
+                  <div className="text-[11px] font-bold text-slate-500 uppercase mt-2 tracking-widest">
+                    {reservation.outbound_flight?.destination_name || reservation.destination_name || activeFlight?.destination?.name || 'Destino'}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-8 mb-12">
-              <div className="item">
-                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Salida</label>
-                <div className="text-lg font-bold text-slate-800 uppercase tracking-tight">{originPlanet}</div>
-                <div className="text-[10px] font-bold text-purple-600 uppercase">
-                  {resolvedDepartureDate ? `${formatDateTime(resolvedDepartureDate)} • ${formatDateTime(resolvedDepartureDate, 'time')}` : 'TBD'}
+            {isExtraService ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-8 mb-12">
+                <div className="item">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Fecha de Solicitud</label>
+                  <div className="text-lg font-bold text-slate-800 uppercase tracking-tight">
+                    {formatDateTime(reservation.created_at || new Date().toISOString())}
+                  </div>
+                  <div className="text-[10px] font-bold text-purple-600 uppercase">
+                    {formatDateTime(reservation.created_at || new Date().toISOString(), 'time')}
+                  </div>
+                </div>
+                <div className="item">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Tipo de Servicio</label>
+                  <span className="text-lg font-bold text-slate-800 uppercase italic">Adicional Logístico</span>
+                </div>
+                <div className="item">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Estado de Activación</label>
+                  <span className={`text-lg font-black uppercase ${reservation.status?.toLowerCase() === 'confirmada' || reservation.status?.toLowerCase() === 'confirmed'
+                    ? 'text-emerald-500'
+                    : 'text-amber-500'
+                    }`}>
+                    {reservation.status || 'Pendiente'}
+                  </span>
                 </div>
               </div>
-              <div className="item">
-                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Aterrizaje (Fecha y Hora)</label>
-                <div className="text-lg font-bold text-slate-800">
-                  {resolvedArrivalDate ? formatDateTime(resolvedArrivalDate) : 'TBD'}
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-8 mb-12">
+                <div className="item">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Salida</label>
+                  <div className="text-lg font-bold text-slate-800 uppercase tracking-tight">{originPlanet}</div>
+                  <div className="text-[10px] font-bold text-purple-600 uppercase">
+                    {resolvedDepartureDate ? `${formatDateTime(resolvedDepartureDate)} • ${formatDateTime(resolvedDepartureDate, 'time')}` : 'TBD'}
+                  </div>
                 </div>
-                <div className="text-[10px] font-bold text-purple-600 uppercase">
-                  {resolvedArrivalDate ? formatDateTime(resolvedArrivalDate, 'time') : 'TBD'}
+                <div className="item">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Aterrizaje (Fecha y Hora)</label>
+                  <div className="text-lg font-bold text-slate-800">
+                    {resolvedArrivalDate ? formatDateTime(resolvedArrivalDate) : 'TBD'}
+                  </div>
+                  <div className="text-[10px] font-bold text-purple-600 uppercase">
+                    {resolvedArrivalDate ? formatDateTime(resolvedArrivalDate, 'time') : 'TBD'}
+                  </div>
+                </div>
+                <div className="item">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Hora de Embarque</label>
+                  <span className="text-lg font-bold text-slate-800">
+                    {resolvedDepartureDate ? getBoardingTime(resolvedDepartureDate) : 'TBD'}
+                  </span>
+                </div>
+                <div className="item">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Clase de Vuelo</label>
+                  <span className="text-lg font-bold text-slate-800 uppercase italic">{activeSeatType}</span>
+                </div>
+                <div className="item">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Nave Asignada</label>
+                  <span className="text-lg font-bold text-slate-800">{resolvedStarshipName}</span>
+                </div>
+                <div className="item">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Estado de Reserva</label>
+                  <span className={`text-lg font-black uppercase ${reservation.status?.toLowerCase() === 'confirmada' || reservation.status?.toLowerCase() === 'confirmed'
+                    ? 'text-emerald-500'
+                    : 'text-amber-500'
+                    }`}>
+                    {reservation.status || 'Pendiente'}
+                  </span>
                 </div>
               </div>
-              <div className="item">
-                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Hora de Embarque</label>
-                <span className="text-lg font-bold text-slate-800">
-                  {resolvedDepartureDate ? getBoardingTime(resolvedDepartureDate) : 'TBD'}
-                </span>
-              </div>
-              <div className="item">
-                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Clase de Vuelo</label>
-                <span className="text-lg font-bold text-slate-800 uppercase italic">{activeSeatType}</span>
-              </div>
-              <div className="item">
-                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Nave Asignada</label>
-                <span className="text-lg font-bold text-slate-800">{resolvedStarshipName}</span>
-              </div>
-              <div className="item">
-                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Estado de Reserva</label>
-                <span className={`text-lg font-black uppercase ${reservation.status?.toLowerCase() === 'confirmada' || reservation.status?.toLowerCase() === 'confirmed'
-                  ? 'text-emerald-500'
-                  : 'text-amber-500'
-                  }`}>
-                  {reservation.status || 'Pendiente'}
-                </span>
-              </div>
-            </div>
+            )}
 
             <div className="mb-12 bg-slate-50/50 rounded-[30px] p-8 border border-slate-100">
               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Servicios Extra Solicitados</h4>
@@ -236,73 +277,75 @@ export default function ReservationTicketTemplate({
                 <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Información Administrativa</h4>
                 <div className="h-px flex-1 bg-slate-100"></div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
-                <div className="space-y-6">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500" /> Vuelo de Salida
-                  </h4>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-[8px] font-black text-slate-400 uppercase">Destino de Misión</label>
-                      <div className="text-xl font-bold text-slate-800 tracking-tight">{reservation.outbound_flight?.destination_name || reservation.destination_name || 'Tierra'}</div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[8px] font-black text-slate-400 uppercase">Puerto de Salida</label>
-                        <div className="text-[11px] font-bold text-slate-700">{reservation.outbound_flight?.origin_name || reservation.origin_name || 'Cabo Cañaveral'}</div>
-                      </div>
-                      <div>
-                        <label className="block text-[8px] font-black text-slate-400 uppercase">Código de Vuelo</label>
-                        <div className="text-[11px] font-black text-purple-600 font-mono">{reservation.outbound_flight?.flight_code || reservation.flight_code}</div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[8px] font-black text-slate-400 uppercase">Fecha Lanzamiento</label>
-                        <div className="text-[11px] font-bold text-slate-700">{formatDate(reservation.outbound_flight?.departure_date || reservation.departure_date)}</div>
-                      </div>
-                      <div>
-                        <label className="block text-[8px] font-black text-slate-400 uppercase">Aterrizaje Previsto</label>
-                        <div className="text-[11px] font-bold text-slate-700">{formatDate(reservation.outbound_flight?.arrival_date || reservation.arrival_date)}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {reservation.return_flight && (
+              {!isExtraService && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
                   <div className="space-y-6">
                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Vuelo de Regreso
+                      <div className="w-1.5 h-1.5 rounded-full bg-purple-500" /> Vuelo de Salida
                     </h4>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-[8px] font-black text-slate-400 uppercase">Destino de Retorno</label>
-                        <div className="text-xl font-bold text-slate-800 tracking-tight">{reservation.return_flight.destination_name}</div>
+                        <label className="block text-[8px] font-black text-slate-400 uppercase">Destino de Misión</label>
+                        <div className="text-xl font-bold text-slate-800 tracking-tight">{reservation.outbound_flight?.destination_name || reservation.destination_name || 'Tierra'}</div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[8px] font-black text-slate-400 uppercase">Puerto de Origen</label>
-                          <div className="text-[11px] font-bold text-slate-700">{reservation.return_flight.origin_name}</div>
+                          <label className="block text-[8px] font-black text-slate-400 uppercase">Puerto de Salida</label>
+                          <div className="text-[11px] font-bold text-slate-700">{reservation.outbound_flight?.origin_name || reservation.origin_name || 'Cabo Cañaveral'}</div>
                         </div>
                         <div>
                           <label className="block text-[8px] font-black text-slate-400 uppercase">Código de Vuelo</label>
-                          <div className="text-[11px] font-black text-blue-600 font-mono">{reservation.return_flight.flight_code}</div>
+                          <div className="text-[11px] font-black text-purple-600 font-mono">{reservation.outbound_flight?.flight_code || reservation.flight_code}</div>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[8px] font-black text-slate-400 uppercase">Salida Orbital (UTC)</label>
-                          <div className="text-[11px] font-bold text-slate-700">{formatDate(reservation.return_flight.departure_date)}</div>
+                          <label className="block text-[8px] font-black text-slate-400 uppercase">Fecha Lanzamiento</label>
+                          <div className="text-[11px] font-bold text-slate-700">{formatDate(reservation.outbound_flight?.departure_date || reservation.departure_date)}</div>
                         </div>
                         <div>
-                          <label className="block text-[8px] font-black text-slate-400 uppercase">Regreso a Tierra (UTC)</label>
-                          <div className="text-[11px] font-bold text-slate-700">{formatDate(reservation.return_flight.arrival_date)}</div>
+                          <label className="block text-[8px] font-black text-slate-400 uppercase">Aterrizaje Previsto</label>
+                          <div className="text-[11px] font-bold text-slate-700">{formatDate(reservation.outbound_flight?.arrival_date || reservation.arrival_date)}</div>
                         </div>
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
+
+                  {reservation.return_flight && (
+                    <div className="space-y-6">
+                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Vuelo de Regreso
+                      </h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-[8px] font-black text-slate-400 uppercase">Destino de Retorno</label>
+                          <div className="text-xl font-bold text-slate-800 tracking-tight">{reservation.return_flight.destination_name}</div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[8px] font-black text-slate-400 uppercase">Puerto de Origen</label>
+                            <div className="text-[11px] font-bold text-slate-700">{reservation.return_flight.origin_name}</div>
+                          </div>
+                          <div>
+                            <label className="block text-[8px] font-black text-slate-400 uppercase">Código de Vuelo</label>
+                            <div className="text-[11px] font-black text-blue-600 font-mono">{reservation.return_flight.flight_code}</div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[8px] font-black text-slate-400 uppercase">Salida Orbital (UTC)</label>
+                            <div className="text-[11px] font-bold text-slate-700">{formatDate(reservation.return_flight.departure_date)}</div>
+                          </div>
+                          <div>
+                            <label className="block text-[8px] font-black text-slate-400 uppercase">Regreso a Tierra (UTC)</label>
+                            <div className="text-[11px] font-bold text-slate-700">{formatDate(reservation.return_flight.arrival_date)}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div>
@@ -433,15 +476,35 @@ export default function ReservationTicketTemplate({
 
       <style jsx>{`
         @media print {
-          body { background: white !important; padding: 0 !important; }
-          .no-print { display: none !important; }
-          .card-wrapper { 
-            max-width: 100% !important; 
-            margin: 0 !important; 
+          html, body {
+            height: auto !important;
+            overflow: hidden !important;
+            margin: 0 !important;
             padding: 0 !important;
+            background: white !important;
+            color: #0f172a !important;
+          }
+          body * {
+            visibility: hidden;
+          }
+          .card-wrapper, .card-wrapper * {
+            visibility: visible;
+          }
+          .card-wrapper {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
             animation: none !important;
+            page-break-inside: avoid;
           }
           .bg-white { border: 1px solid #e2e8f0 !important; box-shadow: none !important; }
+          .no-print { display: none !important; }
         }
       `}</style>
     </div>

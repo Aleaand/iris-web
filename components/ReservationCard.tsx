@@ -349,13 +349,13 @@ export default function ReservationCard({ reservation }: { reservation: any }) {
               <Info size={14} /> Detalles
             </button>
 
-            {reservation.flights && reservation.flights.length > 0 && (
-              <div className="pt-4 mt-4 border-t border-white/5 space-y-2">
-                <button onClick={() => handleAction('cancel')} className="w-full text-[9px] text-slate-500 hover:text-red-400 uppercase font-black tracking-widest text-left transition-colors">Solicitar Cancelación</button>
+            <div className="pt-4 mt-4 border-t border-white/5 space-y-2">
+              <button onClick={() => handleAction('cancel')} className="w-full text-[9px] text-slate-500 hover:text-red-400 uppercase font-black tracking-widest text-left transition-colors">Solicitar Cancelación</button>
+              {reservation.flights && reservation.flights.length > 0 && (
                 <button onClick={() => handleAction('upgrade')} className="w-full text-[9px] text-slate-500 hover:text-amber-400 uppercase font-black tracking-widest text-left transition-colors">Solicitar Upgrade</button>
-                <button onClick={() => handleAction('modify')} className="w-full text-[9px] text-slate-500 hover:text-blue-400 uppercase font-black tracking-widest text-left transition-colors">Modificar Reserva</button>
-              </div>
-            )}
+              )}
+              <button onClick={() => handleAction('modify')} className="w-full text-[9px] text-slate-500 hover:text-blue-400 uppercase font-black tracking-widest text-left transition-colors">Modificar Reserva</button>
+            </div>
           </div>
         </div>
       </div>
@@ -364,7 +364,7 @@ export default function ReservationCard({ reservation }: { reservation: any }) {
         <>
           <AnimatePresence>
             {showDetails && (
-              <div className="fixed inset-0 z-[500] overflow-y-auto bg-black/90 backdrop-blur-2xl no-print">
+              <div className="fixed inset-0 z-[500] overflow-y-auto bg-black/90 backdrop-blur-2xl">
                 <button
                   onClick={() => setShowDetails(false)}
                   className="fixed top-8 right-8 z-[600] w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all no-print"
